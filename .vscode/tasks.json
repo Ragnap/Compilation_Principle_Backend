@@ -1,0 +1,54 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "g++",
+			"command": "E:/Code/Environment/MinGW64/bin/g++.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-std=c++14",
+				"-g",
+				"${file}",
+				"-o",
+				"${workspaceFolder}\\${fileBasenameNoExtension}.exe"
+			],
+			"options": {
+				"cwd": "E:/Code/Environment/MinGW64/bin"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "编译器: E:/Code/Environment/MinGW64/bin/g++.exe"
+		},
+		{
+			"label": "Creat Data",
+			"command": "./Build/data.exe",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "Get Correct Anwser",
+			"command": "./Build/answer.exe",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "Get My Anwser",
+			"command": "./Build/base.exe",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "Build",
+			"dependsOn": [
+				"Client Build",
+				"Server Build"
+			]
+		}
+	]
+}
