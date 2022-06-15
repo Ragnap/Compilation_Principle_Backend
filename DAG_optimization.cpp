@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-15 19:21:35
+ * @LastEditTime : 2022-06-15 23:58:02
  * @Description  : 四元式DAG优化程序
  */
 #include <iostream>
@@ -366,7 +366,7 @@ void addEdge(string opera, string mark_1, string mark_2, string result) {
         }
     }
 }
-void check(int line) {
+void check(int line = 0) {
     cout << "####### now finish line:" << line << endl << endl;
     for(int i = nodeCnt; i; i--) {
         cout << "Node id:" << i << endl;
@@ -384,16 +384,43 @@ void check(int line) {
     cout << "###################" << endl;
     cout << endl;
 }
+//输出一个四元式
+void printQuaternary(string ope, int markID_1, int markID_2, int resultID) {
+    cout << ope << '\t';
+    if(markID_1 == -1)
+        cout << "_";
+    else
+        cout << mark[markID_1].markString;
+    cout << '\t';
+    if(markID_2 == -1)
+        cout << "_";
+    else
+        cout << mark[markID_2].markString;
+    cout << '\t';
+    cout << mark[resultID].markString << endl;
+}
+//重构四元式
+void rebuild() {
+    for(int i = 1; i <= nodeCnt; i++) {
+        if(node[i].leftNodeID || node[i].rightNodeID) {
+            printQuaternary(node[i].opera, node[node[i].leftNodeID].getMainMark(), node[node[i].rightNodeID].getMainMark(), node[i].getMainMark());
+        }
+        for(int j = 0; j < node[i].additionMark.size(); j++) {
+            if(!mark[node[i].additionMark[j]].isTempMark()) {
+                printQuaternary("=", node[i].getMainMark(), -1, node[i].additionMark[j]);
+            }
+        }
+    }
+}
 int main() {
     freopen("test_input.txt", "r", stdin);
     freopen("test_output.txt", "w", stdout);
     string ope, a, b, c;
-    int line = 0;
     while(cin >> ope) {
         cin >> a >> b >> c;
         addEdge(ope, a, b, c);
-
-        check(++line);
     }
+    // check();
+    rebuild();
     return 0;
 }
