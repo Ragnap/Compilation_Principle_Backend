@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-15 23:58:02
+ * @LastEditTime : 2022-06-16 02:39:48
  * @Description  : 四元式DAG优化程序
  */
 #include <iostream>
@@ -134,6 +134,7 @@ public:
         tempMark = (label[0] == 't');
         //判断一个标记的常数类型
         constKind = checkConstKind(markString);
+        lastNodeID = 0;
         switch(constKind) {
             case NOT_CONST:
                 break;
@@ -284,14 +285,25 @@ void buildNode(int mainMark_ID, int leftNodeID = 0, int rightNodeID = 0, string 
 
     mark[mainMark_ID].setNodeID(nodeCnt);
 }
-
+//从操作符映射到节点的主要编号，对主要标记进行运算
+string getNodeMainMarkString(string markString) {
+    if(markString == "_" || checkConstKind(markString) != NOT_CONST)
+        return markString;
+    if(markID.find(markString) == markID.end())
+        return markString;
+    if(mark[markID[markString]].getNodeID() == 0)
+        return markString;
+    return mark[node[mark[markID[markString]].getNodeID()].getMainMark()].markString;
+}
 //从输入的四元式构建DAG的一条边
 void addEdge(string opera, string mark_1, string mark_2, string result) {
     int markID_1, markID_2, markID_3;
     int nodeID_1, nodeID_2, nodeID_3;
     bool newMark = 0;
-    ConstKind kind_1 = checkConstKind(mark_1);
-    ConstKind kind_2 = checkConstKind(mark_2);
+    string topMark_1 = getNodeMainMarkString(mark_1);
+    string topMark_2 = getNodeMainMarkString(mark_2);
+    ConstKind kind_1 = checkConstKind(topMark_1);
+    ConstKind kind_2 = checkConstKind(topMark_2);
     if(kind_1 != NOT_CONST && kind_2 != NOT_CONST) {  //常值表达式
         ConstKind resKind = max(kind_1, kind_2);
         string temp;
@@ -299,13 +311,13 @@ void addEdge(string opera, string mark_1, string mark_2, string result) {
             case BOOL:
                 ///////////
             case CHAR:
-                temp = to_string(calcConstValue(stoi(mark_1), stoi(mark_2), opera[0]));
+                temp = to_string(calcConstValue(stoi(topMark_1), stoi(topMark_2), opera[0]));
                 break;
             case INT:
-                temp = to_string(calcConstValue(stoi(mark_1), stoi(mark_2), opera[0]));
+                temp = to_string(calcConstValue(stoi(topMark_1), stoi(topMark_2), opera[0]));
                 break;
             case DOUBLE:
-                temp = to_string(calcConstValue(stof(mark_1), stof(mark_2), opera[0]));
+                temp = to_string(calcConstValue(stof(topMark_1), stof(topMark_2), opera[0]));
                 break;
         }
         markID_1 = getMarkID(temp, newMark);
@@ -399,6 +411,9 @@ void printQuaternary(string ope, int markID_1, int markID_2, int resultID) {
     cout << '\t';
     cout << mark[resultID].markString << endl;
 }
+void printQuaternary(string ope, string mark_1, string mark_2, string result) {
+    cout << ope << '\t' << mark_1 << '\t' << mark_2 << "\t" << result << endl;
+}
 //重构四元式
 void rebuild() {
     for(int i = 1; i <= nodeCnt; i++) {
@@ -412,6 +427,7 @@ void rebuild() {
         }
     }
 }
+
 int main() {
     freopen("test_input.txt", "r", stdin);
     freopen("test_output.txt", "w", stdout);
@@ -420,7 +436,8 @@ int main() {
         cin >> a >> b >> c;
         addEdge(ope, a, b, c);
     }
-    // check();
+    cout << endl;
+    check();
     rebuild();
     return 0;
 }

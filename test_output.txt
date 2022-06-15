@@ -1,13 +1,79 @@
+
+####### now finish line:0
+
+Node id:9
+l: 0  r:0
+operator: 
+have: '0'| g
+
+Node id:8
+l: 0  r:0
+operator: 
+have: 4.962617| t6 f
+
+Node id:7
+l: 0  r:0
+operator: 
+have: 15.930000| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 1.770000| t4
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 1.23| d
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2 c
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t3
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+0	 at 	1
+a	 at 	1
+9	 at 	2
+t1	 at 	2
+b	 at 	2
+3	 at 	3
+t2	 at 	3
+c	 at 	3
+1.23	 at 	4
+d	 at 	4
+3.21	 at 	5
+e	 at 	5
+t3	 at 	2
+1.770000	 at 	6
+t4	 at 	6
+15.930000	 at 	7
+t5	 at 	7
+4.962617	 at 	8
+t6	 at 	8
+f	 at 	8
+'0'	 at 	9
+g	 at 	9
+###################
+
 =	0	_	a
-+	0	9	t1
-=	t1	_	b
+=	9	_	b
 =	3	_	c
-/	t1	3	t2
 =	1.23	_	d
 =	3.21	_	e
-+	0	t1	t3
--	3	1.23	t4
-*	t3	t4	t5
-/	t5	3.21	t6
-=	t6	_	f
+=	4.962617	_	f
 =	'0'	_	g
