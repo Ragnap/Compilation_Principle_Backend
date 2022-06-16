@@ -1,6 +1,5 @@
 =   1   _   a
 -   a   _   a
-<=  a   a   c
+<=  1   a   c
 ==  a   c   b
 !   b   _   t1
-=   t1  _   c

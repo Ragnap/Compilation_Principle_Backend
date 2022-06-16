@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-17 02:15:49
+ * @LastEditTime : 2022-06-17 02:46:05
  * @Description  : 四元式DAG优化程序
  */
 #include <cstdio>
@@ -12,7 +12,7 @@
 #include <vector>
 using namespace std;
 //最大标记数量
-const int MARK_SIZE = 10000;
+const int MARK_SIZE = 1000;
 //最大附加标记数量
 const int ADD_MARK_SIZE = 100;
 //最大四元式数量
@@ -29,7 +29,16 @@ public:
     string mark_1;
     string mark_2;
     string result;
-} quatResult[QUAT_SIZE];
+};
+//输出一个四元式,提供的是字符串
+Quaternary buildQuaternary(string ope, string mark_1, string mark_2, string result) {
+    Quaternary res;
+    res.ope = ope;
+    res.mark_1 = mark_1;
+    res.mark_2 = mark_2;
+    res.result = result;
+    return res;
+}
 // 四元式记数
 int quatCnt = 0;
 //////////////////////////////////类型部分//////////////////////////////
@@ -260,12 +269,9 @@ ConstKind checkMarkKind(string str) {
 class Node {
 public:
     //设置主标记
-    void setMainMark(int mark_ID) {
+    void setMainMark(int mark_ID, bool is_temp) {
         mainMark = mark_ID;
-    }
-    //设置操作符
-    void setMainMark(string ope) {
-        opera = ope;
+        tempMainMark = is_temp;
     }
     //获取主标记
     int getMainMark() {
@@ -291,14 +297,15 @@ public:
         }
     }
     //加入附加标记
-    void addAdditionMark(int mark_ID) {
+    void addAdditionMark(int mark_ID, bool is_temp) {
         //如果已经在附加标记中就不再加入
         if(inNode(mark_ID))
             return;
         //当主标记是临时标记但新加入的附加标记不是临时标记时进行交换
-        if(mark[mainMark].isTempMark() && !mark[mark_ID].isTempMark()) {
+        if(tempMainMark && !is_temp) {
             additionMark.push_back(mainMark);
             mainMark = mark_ID;
+            tempMainMark = 0;
         }
         else
             additionMark.push_back(mark_ID);
@@ -315,11 +322,9 @@ public:
 private:
     //主标记编号
     int mainMark;
-} node[MARK_SIZE];
-//节点数量
-int nodeCnt = 0;
-//节点有效标记
-bool needNode[MARK_SIZE];
+    //主标记是否为临时标记
+    bool tempMainMark;
+};
 
 //////////////////////////////////DAG部分//////////////////////////////
 
@@ -327,8 +332,8 @@ bool needNode[MARK_SIZE];
 class DAG_optimization {
 public:
     //重构四元式
-    void rebuild() {
-        ofstream output("test_output.txt");
+    vector<Quaternary> rebuild() {
+        vector<Quaternary> result;
         //先标记需要用的表达式
         for(int i = nodeCnt; i; i--) {
             if(needNode[i] == 1)
@@ -353,15 +358,16 @@ public:
         for(int i = 1; i <= nodeCnt; i++) {
             if(needNode[i]) {
                 if(node[i].leftNodeID || node[i].rightNodeID) {
-                    printQuaternary(node[i].opera, node[node[i].leftNodeID].getMainMark(), node[node[i].rightNodeID].getMainMark(), node[i].getMainMark());
+                    result.push_back(buildQuaternary(node[i].opera, mark[node[node[i].leftNodeID].getMainMark()].markString, mark[node[node[i].rightNodeID].getMainMark()].markString, mark[node[i].getMainMark()].markString));
                 }
                 for(int j = 0; j < node[i].additionMark.size(); j++) {
                     if(!mark[node[i].additionMark[j]].isTempMark()) {
-                        printQuaternary("=", node[i].getMainMark(), -1, node[i].additionMark[j]);
+                        result.push_back(buildQuaternary("=", mark[node[i].getMainMark()].markString, "_", mark[node[i].additionMark[j]].markString));
                     }
                 }
             }
         }
+        return result;
     }
     //从输入的四元式构建DAG的一条边
     void addEdge(string opera, string mark_1, string mark_2, string result) {
@@ -401,7 +407,7 @@ public:
                 node[i].delAdditionMark(markID_3);
             }
             nodeID_1 = mark[markID_1].getNodeID();
-            node[nodeID_1].addAdditionMark(markID_3);
+            node[nodeID_1].addAdditionMark(markID_3, mark[markID_3].isTempMark());
             mark[markID_3].setNodeID(nodeID_1);
         }
         //双目运算常值表达式
@@ -453,9 +459,10 @@ public:
                 node[i].delAdditionMark(markID_3);
             }
             nodeID_1 = mark[markID_1].getNodeID();
-            node[nodeID_1].addAdditionMark(markID_3);
+            node[nodeID_1].addAdditionMark(markID_3, mark[markID_3].isTempMark());
             mark[markID_3].setNodeID(nodeID_1);
         }
+
         //赋值运算
         else if(opera == "=") {
             markID_1 = getMarkID(mark_1, newMark);
@@ -468,7 +475,7 @@ public:
                     node[i].delAdditionMark(markID_3);
                 }
                 nodeID_1 = mark[markID_1].getNodeID();
-                node[nodeID_1].addAdditionMark(markID_3);
+                node[nodeID_1].addAdditionMark(markID_3, mark[markID_3].isTempMark());
                 mark[markID_3].setNodeID(nodeID_1);
             }
             else {  //对主标记中常量赋值应该删去之前的主标记
@@ -483,11 +490,11 @@ public:
                             }
                         }
                         if(pos == node[i].additionMark.size()) {  //附加标记中没有非临时变量
-                            node[i].setMainMark(node[i].additionMark.back());
+                            node[i].setMainMark(node[i].additionMark.back(), mark[node[i].additionMark.back()].isTempMark());
                             node[i].additionMark.pop_back();
                         }
                         else {
-                            node[i].setMainMark(node[i].additionMark[pos]);
+                            node[i].setMainMark(node[i].additionMark[pos], mark[node[i].additionMark[pos]].isTempMark());
                             node[i].additionMark.erase(node[i].additionMark.begin() + pos);
                         }
                     }
@@ -495,7 +502,7 @@ public:
                         node[i].delAdditionMark(markID_3);
                 }
                 nodeID_1 = mark[markID_1].getNodeID();
-                node[nodeID_1].addAdditionMark(markID_3);
+                node[nodeID_1].addAdditionMark(markID_3, mark[markID_3].isTempMark());
                 mark[markID_3].setNodeID(nodeID_1);
             }
         }
@@ -521,7 +528,7 @@ public:
                 }
             }
             if(sameExpression) {  //存在公共表达式
-                node[sameExpression].addAdditionMark(markID_3);
+                node[sameExpression].addAdditionMark(markID_3, mark[markID_3].isTempMark());
                 mark[markID_3].setNodeID(sameExpression);
             }
             else {
@@ -569,7 +576,7 @@ private:
     //创建新节点
     void buildNode(int mainMark_ID, int leftNodeID = 0, int rightNodeID = 0, string ope = "") {
         //创建图上的新节点
-        node[++nodeCnt].setMainMark(mainMark_ID);
+        node[++nodeCnt].setMainMark(mainMark_ID, mark[mainMark_ID].isTempMark());
         node[nodeCnt].opera = ope;
         node[nodeCnt].leftNodeID = leftNodeID;
         node[nodeCnt].rightNodeID = rightNodeID;
@@ -587,39 +594,22 @@ private:
             return markString;
         return mark[node[mark[markID[markString]].getNodeID()].getMainMark()].markString;
     }
-    //输出一个四元式,提供的是编号
-    void printQuaternary(string ope, int markID_1, int markID_2, int resultID) {
-        quatResult[quatCnt].ope = ope;
-        if(markID_1 == -1)
-            quatResult[quatCnt].mark_1 = "_";
-        else
-            quatResult[quatCnt].mark_1 = mark[markID_1].markString;
-
-        if(markID_2 == -1)
-            quatResult[quatCnt].mark_2 = "_";
-        else
-            quatResult[quatCnt].mark_2 = mark[markID_2].markString;
-
-        quatResult[quatCnt].result = mark[resultID].markString;
-        quatCnt++;
-    }
-    //输出一个四元式,提供的是字符串
-    void printQuaternary(string ope, string mark_1, string mark_2, string result) {
-        quatResult[quatCnt].ope = ope;
-        quatResult[quatCnt].mark_1 = mark_1;
-        quatResult[quatCnt].mark_2 = mark_2;
-        quatResult[quatCnt].result = result;
-        quatCnt++;
-    }
-
+    //节点数组
+    Node node[MARK_SIZE];
+    //节点数量
+    int nodeCnt = 0;
+    //节点有效标记
+    bool needNode[MARK_SIZE];
 } DAG;
-void printResult() {
+/////////////
+void printBlock(vector<Quaternary> blockResult) {
     ofstream output("test_output.txt");
-    for(int i = 0; i < quatCnt; i++) {
-        output << quatResult[i].ope << '\t' << quatResult[i].mark_1 << '\t' << quatResult[i].mark_2 << '\t' << quatResult[i].result << endl;
+    for(int i = 0; i < blockResult.size(); i++) {
+        output << blockResult[i].ope << '\t' << blockResult[i].mark_1 << '\t' << blockResult[i].mark_2 << '\t' << blockResult[i].result << endl;
     }
     output.close();
 }
+/////////////
 int main() {
     // freopen("test_input.txt", "r", stdin);
     // freopen("test_output.txt", "w", stdout);
@@ -632,8 +622,8 @@ int main() {
     }
     // cout << endl;
     //  check();
-    DAG.rebuild();
-    printResult();
+    vector<Quaternary> ans = DAG.rebuild();
+    printBlock(ans);
     system("pause");
     return 0;
 }
