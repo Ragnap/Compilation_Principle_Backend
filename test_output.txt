@@ -28,9 +28,7 @@ Ture: 1	False: -1
 
 *** now block ID: 6
 *(we	_	_	_	)
-(=	9	_	c	)
-(+	c	b	t3	)
-(=	t3	_	c	)
+(+	9	b	c	)
 (end	_	_	_	)
 Ture: -1	False: -1
 

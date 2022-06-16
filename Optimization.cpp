@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-17 06:27:00
+ * @LastEditTime : 2022-06-17 06:54:57
  * @Description  : 四元式DAG优化程序
  */
 #include <cstdio>
@@ -27,6 +27,12 @@ string binaryOperatorTable[1000];
 //////////////////////////////////四元式类//////////////////////////////
 class Quaternary {
 public:
+    void clear() {
+        ope.clear();
+        mark_1.clear();
+        mark_2.clear();
+        result.clear();
+    }
     string ope;
     string mark_1;
     string mark_2;
@@ -372,6 +378,10 @@ public:
                 }
             }
         }
+        // 特判输出块结尾
+        if(blockEnd.ope.size()) {
+            result.push_back(blockEnd);
+        }
         return result;
     }
     //从输入的四元式构建DAG的一条边
@@ -395,6 +405,7 @@ public:
                 buildNode(markID_1);
             }
             needNode[mark[markID_1].getNodeID()] = 1;
+            blockEnd = inputQuaternary;
             return;
         }
         //单目运算常值表达式
@@ -557,32 +568,19 @@ public:
     }
     //重置DAG
     void clear() {
+        markID.clear();
+        markCnt = 0;
         for(int i = 0; i <= nodeCnt; i++) {
             node[i].clear();
             needNode[i] = 0;
         }
         nodeCnt = 0;
-    }
-    void check(int line = 0) {
-        cout << "####### now finish line:" << line << endl << endl;
-        for(int i = nodeCnt; i; i--) {
-            cout << "Node id:" << i << endl;
-            cout << "l: " << node[i].leftNodeID << "  r:" << node[i].rightNodeID << endl;
-            cout << "operator: " << node[i].opera << endl;
-            cout << "have: " << mark[node[i].getMainMark()].markString << "|";
-            for(int j = 0; j < node[i].additionMark.size(); j++) {
-                cout << " " << mark[node[i].additionMark[j]].markString;
-            }
-            cout << endl << endl;
-        }
-        for(int i = 0; i < markCnt; i++) {
-            cout << mark[i].markString << "\t at \t" << mark[i].getNodeID() << endl;
-        }
-        cout << "###################" << endl;
-        cout << endl;
+        blockEnd.clear();
     }
 
 private:
+    //特殊的块结束符
+    Quaternary blockEnd;
     //获取一个标记的编号,对于第一次出现的标记自动初始化
     int getMarkID(string markString, bool& isNew) {
         if(markID.find(markString) != markID.end()) {  //已有编号
@@ -631,6 +629,7 @@ class Block {
 public:
     Block() {
         clear();
+        quat.clear();
     }
     //返回条件为真/无条件 时转向的块的ID
     int getNextTrueID() {
@@ -666,7 +665,7 @@ public:
     // DAG优化
     void optimization() {
         DAG.clear();
-        for(int i = 0; i < quatCnt; i++) {
+        for(int i = 0; i < quat.size(); i++) {
             DAG.addEdge(quat[i]);
         }
         quat = DAG.rebuild();
@@ -674,7 +673,7 @@ public:
     }
     //输出块信息
     void check(ofstream& output) {
-        // optimization();
+        optimization();
         if(head.ope.size()) {
             output << "*(" << head.ope << '\t' << head.mark_1 << '\t' << head.mark_2 << '\t' << head.result << '\t' << ')' << endl;
         }
@@ -779,7 +778,6 @@ public:
                 lineBlockID[nowline] = nowBlock;
             }
             nowline++;
-            check();
         }
         quatCnt = nowline;
         nowBlock++;
@@ -794,6 +792,7 @@ public:
             block[i].check(output);
             output << endl;
         }
+        // block[1].check(output);
     }
 
 private:
