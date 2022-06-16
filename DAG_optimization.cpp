@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-16 16:41:30
+ * @LastEditTime : 2022-06-16 17:25:44
  * @Description  : 四元式DAG优化程序
  */
 #include <iostream>
@@ -194,7 +194,7 @@ public:
         }
     }
     //加入附加标记
-    void addAdditioMark(int mark_ID) {
+    void addAdditionMark(int mark_ID) {
         //如果已经在附加标记中就不再加入
         if(inNode(mark_ID))
             return;
@@ -294,28 +294,51 @@ void addEdge(string opera, string mark_1, string mark_2, string result) {
             node[i].delAdditionMark(markID_3);
         }
         nodeID_1 = mark[markID_1].getNodeID();
-        node[nodeID_1].addAdditioMark(markID_3);
+        node[nodeID_1].addAdditionMark(markID_3);
         mark[markID_3].setNodeID(nodeID_1);
     }
 
     else if(opera == "=") {  //赋值运算
         markID_1 = getMarkID(mark_1, newMark);
-        if(kind_1 == NOT_CONST) {
-            if(newMark) {  //新建节点
-                buildNode(markID_1);
+        if(newMark) {  //新建节点
+            buildNode(markID_1);
+        }
+        if(mark_1[0] == 't' || kind_1 == NOT_CONST) {
+            markID_3 = getMarkID(result, newMark);
+            for(int i = 1; i <= nodeCnt; i++) {
+                node[i].delAdditionMark(markID_3);
             }
+            nodeID_1 = mark[markID_1].getNodeID();
+            node[nodeID_1].addAdditionMark(markID_3);
+            mark[markID_3].setNodeID(nodeID_1);
         }
-        else {
-            buildNode(getMarkID(topMark_1, newMark));
+        else {  //对主标记中常量赋值应该删去之前的主标记
+            markID_3 = getMarkID(result, newMark);
+            for(int i = 1; i <= nodeCnt; i++) {
+                if(node[i].getMainMark() == markID_3) {  //从附加标记中选取一个标记作为主标记
+                    //优先选取非临时变量
+                    int pos;
+                    for(pos = 0; pos < node[i].additionMark.size(); pos++) {
+                        if(!mark[node[i].additionMark[pos]].isTempMark()) {
+                            break;
+                        }
+                    }
+                    if(pos == node[i].additionMark.size()) {  //附加标记中没有非临时变量
+                        node[i].setMainMark(node[i].additionMark.back());
+                        node[i].additionMark.pop_back();
+                    }
+                    else {
+                        node[i].setMainMark(node[i].additionMark[pos]);
+                        node[i].additionMark.erase(node[i].additionMark.begin() + pos);
+                    }
+                }
+                else
+                    node[i].delAdditionMark(markID_3);
+            }
+            nodeID_1 = mark[markID_1].getNodeID();
+            node[nodeID_1].addAdditionMark(markID_3);
+            mark[markID_3].setNodeID(nodeID_1);
         }
-
-        markID_3 = getMarkID(result, newMark);
-        for(int i = 1; i <= nodeCnt; i++) {
-            node[i].delAdditionMark(markID_3);
-        }
-        nodeID_1 = mark[markID_1].getNodeID();
-        node[nodeID_1].addAdditioMark(markID_3);
-        mark[markID_3].setNodeID(nodeID_1);
     }
 
     else {
@@ -339,7 +362,7 @@ void addEdge(string opera, string mark_1, string mark_2, string result) {
             }
         }
         if(sameExpression) {  //存在公共表达式
-            node[sameExpression].addAdditioMark(markID_3);
+            node[sameExpression].addAdditionMark(markID_3);
             mark[markID_3].setNodeID(sameExpression);
         }
         else {
