@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-16 02:39:48
+ * @LastEditTime : 2022-06-16 16:41:30
  * @Description  : 四元式DAG优化程序
  */
 #include <iostream>
@@ -107,23 +107,6 @@ double calcConstValue(double a, double b, char ope) {
     return 0;
 }
 
-//整形常数表
-int CT_int[MARK_SIZE];
-//整形常数数量
-int intSize;
-//浮点形常数表
-double CT_double[MARK_SIZE];
-//整形常数数量
-int doubleSize;
-//布尔型常数表
-bool CT_bool[MARK_SIZE];
-//整形常数数量
-int boolSize;
-//字符型常数表
-char CT_char[MARK_SIZE];
-//整形常数数量
-int charSize;
-
 //标记类
 class Mark {
 public:
@@ -135,26 +118,6 @@ public:
         //判断一个标记的常数类型
         constKind = checkConstKind(markString);
         lastNodeID = 0;
-        switch(constKind) {
-            case NOT_CONST:
-                break;
-            case INT:
-                constKindIndex = intSize;
-                CT_int[intSize++] = stoi(markString);
-                break;
-            case DOUBLE:
-                constKindIndex = doubleSize;
-                CT_double[doubleSize++] = stof(markString);
-                break;
-            case CHAR:
-                constKindIndex = charSize;
-                CT_char[charSize++] = markString[1];
-                break;
-            case BOOL:  ///////////////////?????????
-                constKindIndex = boolSize;
-                CT_bool[boolSize++] = 1;
-                break;
-        }
     }
     //设置在图上的节点编号
     void setNodeID(int node_ID) {
@@ -287,6 +250,7 @@ void buildNode(int mainMark_ID, int leftNodeID = 0, int rightNodeID = 0, string 
 }
 //从操作符映射到节点的主要编号，对主要标记进行运算
 string getNodeMainMarkString(string markString) {
+    // return markString;
     if(markString == "_" || checkConstKind(markString) != NOT_CONST)
         return markString;
     if(markID.find(markString) == markID.end())
@@ -324,6 +288,7 @@ void addEdge(string opera, string mark_1, string mark_2, string result) {
         if(newMark) {  //新建节点
             buildNode(markID_1);
         }
+
         markID_3 = getMarkID(result, newMark);
         for(int i = 1; i <= nodeCnt; i++) {
             node[i].delAdditionMark(markID_3);
@@ -335,9 +300,15 @@ void addEdge(string opera, string mark_1, string mark_2, string result) {
 
     else if(opera == "=") {  //赋值运算
         markID_1 = getMarkID(mark_1, newMark);
-        if(newMark) {  //新建节点
-            buildNode(markID_1);
+        if(kind_1 == NOT_CONST) {
+            if(newMark) {  //新建节点
+                buildNode(markID_1);
+            }
         }
+        else {
+            buildNode(getMarkID(topMark_1, newMark));
+        }
+
         markID_3 = getMarkID(result, newMark);
         for(int i = 1; i <= nodeCnt; i++) {
             node[i].delAdditionMark(markID_3);
@@ -396,7 +367,7 @@ void check(int line = 0) {
     cout << "###################" << endl;
     cout << endl;
 }
-//输出一个四元式
+//输出一个四元式,提供的是编号
 void printQuaternary(string ope, int markID_1, int markID_2, int resultID) {
     cout << ope << '\t';
     if(markID_1 == -1)
@@ -411,6 +382,7 @@ void printQuaternary(string ope, int markID_1, int markID_2, int resultID) {
     cout << '\t';
     cout << mark[resultID].markString << endl;
 }
+//输出一个四元式,提供的是
 void printQuaternary(string ope, string mark_1, string mark_2, string result) {
     cout << ope << '\t' << mark_1 << '\t' << mark_2 << "\t" << result << endl;
 }
@@ -435,9 +407,10 @@ int main() {
     while(cin >> ope) {
         cin >> a >> b >> c;
         addEdge(ope, a, b, c);
+        check();
     }
     cout << endl;
-    check();
+    // check();
     rebuild();
     return 0;
 }
