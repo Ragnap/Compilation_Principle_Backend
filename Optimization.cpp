@@ -1,29 +1,94 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-16 23:29:54
+ * @LastEditTime : 2022-06-17 02:15:49
  * @Description  : 四元式DAG优化程序
  */
+#include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <map>
+#include <string>
 #include <vector>
 using namespace std;
 //最大标记数量
 const int MARK_SIZE = 10000;
 //最大附加标记数量
 const int ADD_MARK_SIZE = 100;
+//最大四元式数量
+const int QUAT_SIZE = 1000;
 
 //单目运算符符号表
 string unaryOperatorTable[1000];
 //双目运算符符号表
 string binaryOperatorTable[1000];
+//////////////////////////////////四元式类//////////////////////////////
+class Quaternary {
+public:
+    string ope;
+    string mark_1;
+    string mark_2;
+    string result;
+} quatResult[QUAT_SIZE];
+// 四元式记数
+int quatCnt = 0;
+//////////////////////////////////类型部分//////////////////////////////
 
 //常数类型枚举变量，以字节数逐渐增大
 enum ConstKind { NOT_CONST, BOOL, CHAR, INT, DOUBLE };
-//判断一个标记的常数类型
+//从符号表确定类型
+class KindMap {
+public:
+    KindMap() {
+        ifstream synbl("synbl.txt");
+        string input, mark, kind;
+        getline(synbl, input);
+        getline(synbl, input);
+        getline(synbl, input);
+        getline(synbl, input);
+        cout << input << endl;
+        while(input.size()) {
+            mark.clear();
+            kind.clear();
+            int pos = 0;
+            while(input[pos] != '\t' && input[pos] != ' ') {
+                mark += input[pos++];
+            }
+            pos++;
+            while(input[pos] != '\t' && input[pos] != ' ') {
+                kind += input[pos++];
+            }
+            if(kind == "bool")
+                markMap[mark] = BOOL;
+            if(kind == "char")
+                markMap[mark] = CHAR;
+            if(kind == "int")
+                markMap[mark] = INT;
+            if(kind == "double")
+                markMap[mark] = DOUBLE;
+            if(kind == "float")
+                markMap[mark] = DOUBLE;
+
+            cout << mark << " " << kind << endl;
+            getline(synbl, input);
+        }
+        synbl.close();
+    }
+    bool inMap(string markString) {
+        return (markMap.find(markString) != markMap.end());
+    }
+    ConstKind getKind(string markString) {
+        return markMap[markString];
+    }
+
+private:
+    map<string, ConstKind> markMap;
+} kindMap;
+//判断一个字符串的常数类型
 ConstKind checkConstKind(string str) {
     if(str == "_")
         return NOT_CONST;
+
     if(isalpha(str[0]))
         return NOT_CONST;
     else if(str[0] == '\'')
@@ -35,21 +100,26 @@ ConstKind checkConstKind(string str) {
         return INT;
     }
 }
+
+//////////////////////////////////常量计算部分///////////////////////////
 //获取常量计算式计算结果
-bool calcConstValue(bool a, bool b, char ope) {
-    switch(ope) {
-        case '&':
-            return a & b;
-            break;
-        case '|':
-            return a | b;
-            break;
-        case '^':
-            return a ^ b;
-            break;
-    }
+// bool 单目 这里只有 !
+bool calcConstValue(bool a) {
+    return !a;
+}
+// 其他单目 这里只有 -
+template<typename T> T calcConstValue(T a) {
+    return -a;
+}
+// bool 双目
+bool calcConstValue(bool a, bool b, string ope) {
+    if(ope == "&&")
+        return a & b;
+    if(ope == "||")
+        return a | b;
     return 0;
 }
+// char 双目
 char calcConstValue(char a, char b, char ope) {
     switch(ope) {
         case '+':
@@ -61,6 +131,7 @@ char calcConstValue(char a, char b, char ope) {
     }
     return 0;
 }
+// int 双目
 int calcConstValue(int a, int b, char ope) {
     switch(ope) {
         case '+':
@@ -90,6 +161,7 @@ int calcConstValue(int a, int b, char ope) {
     }
     return 0;
 }
+// double 双目
 double calcConstValue(double a, double b, char ope) {
     switch(ope) {
         case '+':
@@ -107,7 +179,22 @@ double calcConstValue(double a, double b, char ope) {
     }
     return 0;
 }
-
+// 比较 双目
+template<typename T> bool calcConstCompareValue(T a, T b, string ope) {
+    if(ope == "<")
+        return a < b;
+    if(ope == "<=")
+        return a <= b;
+    if(ope == ">")
+        return a > b;
+    if(ope == ">=")
+        return a >= b;
+    if(ope == "==")
+        return a == b;
+    if(ope == "!=")
+        return a != b;
+    return 0;
+}
 //////////////////////////////////标记部分//////////////////////////////
 
 //标记类
@@ -158,7 +245,15 @@ private:
 map<string, int> markID;
 //标记数量
 int markCnt = 0;
-
+//判断一个标号的类型
+ConstKind checkMarkKind(string str) {
+    if(str == "_")
+        return NOT_CONST;
+    if(markID.find(str) == markID.end())
+        return NOT_CONST;
+    else
+        return checkConstKind(str);
+}
 //////////////////////////////////节点部分//////////////////////////////
 
 // 结点类
@@ -233,6 +328,7 @@ class DAG_optimization {
 public:
     //重构四元式
     void rebuild() {
+        ofstream output("test_output.txt");
         //先标记需要用的表达式
         for(int i = nodeCnt; i; i--) {
             if(needNode[i] == 1)
@@ -269,6 +365,8 @@ public:
     }
     //从输入的四元式构建DAG的一条边
     void addEdge(string opera, string mark_1, string mark_2, string result) {
+        if(mark_1 == "_" && mark_2 != "_")
+            swap(mark_1, mark_2);
         int markID_1, markID_2, markID_3;
         int nodeID_1, nodeID_2, nodeID_3;
         bool newMark = 0;
@@ -276,27 +374,28 @@ public:
         string topMark_2 = getNodeMainMarkString(mark_2);
         ConstKind kind_1 = checkConstKind(topMark_1);
         ConstKind kind_2 = checkConstKind(topMark_2);
-        if(kind_1 != NOT_CONST && kind_2 != NOT_CONST) {  //常值表达式
-            ConstKind resKind = max(kind_1, kind_2);
+        //单目运算常值表达式
+        if(opera != "=" && kind_1 != NOT_CONST && mark_2 == "_") {
             string temp;
-            switch(resKind) {
+            kind_1 = kindMap.getKind(mark_1);
+            switch(kind_1) {
                 case BOOL:
-                    ///////////
+                    temp = to_string(calcConstValue((bool)stoi(topMark_1)));
+                    break;
                 case CHAR:
-                    temp = to_string(calcConstValue(stoi(topMark_1), stoi(topMark_2), opera[0]));
+                    temp = to_string(calcConstValue(stoi(topMark_1)));
                     break;
                 case INT:
-                    temp = to_string(calcConstValue(stoi(topMark_1), stoi(topMark_2), opera[0]));
+                    temp = to_string(calcConstValue(stoi(topMark_1)));
                     break;
                 case DOUBLE:
-                    temp = to_string(calcConstValue(stof(topMark_1), stof(topMark_2), opera[0]));
+                    temp = to_string(calcConstValue(stof(topMark_1)));
                     break;
             }
             markID_1 = getMarkID(temp, newMark);
             if(newMark) {  //新建节点
                 buildNode(markID_1);
             }
-
             markID_3 = getMarkID(result, newMark);
             for(int i = 1; i <= nodeCnt; i++) {
                 node[i].delAdditionMark(markID_3);
@@ -305,8 +404,60 @@ public:
             node[nodeID_1].addAdditionMark(markID_3);
             mark[markID_3].setNodeID(nodeID_1);
         }
-
-        else if(opera == "=") {  //赋值运算
+        //双目运算常值表达式
+        else if(opera != "=" && kind_1 != NOT_CONST && kind_2 != NOT_CONST) {
+            string temp;
+            kind_1 = kindMap.getKind(mark_1);
+            kind_2 = kindMap.getKind(mark_2);
+            //双目比较运算
+            if(opera == ">=" || opera == ">" || opera == "<=" || opera == "<" || opera == "==" || opera == "!=") {
+                ConstKind resKind = max(kind_1, kind_2);
+                switch(resKind) {
+                    case BOOL:
+                        temp = to_string(calcConstCompareValue(stoi(topMark_1), stoi(topMark_2), opera));
+                        break;
+                    case CHAR:
+                        temp = to_string(calcConstCompareValue(stoi(topMark_1), stoi(topMark_2), opera));
+                        break;
+                    case INT:
+                        temp = to_string(calcConstCompareValue(stoi(topMark_1), stoi(topMark_2), opera));
+                        break;
+                    case DOUBLE:
+                        temp = to_string(calcConstCompareValue(stof(topMark_1), stof(topMark_2), opera));
+                        break;
+                }
+            }
+            //双目算术运算
+            else {
+                ConstKind resKind = max(kind_1, kind_2);
+                switch(resKind) {
+                    case BOOL:
+                        ///////////
+                    case CHAR:
+                        temp = to_string(calcConstValue(stoi(topMark_1), stoi(topMark_2), opera[0]));
+                        break;
+                    case INT:
+                        temp = to_string(calcConstValue(stoi(topMark_1), stoi(topMark_2), opera[0]));
+                        break;
+                    case DOUBLE:
+                        temp = to_string(calcConstValue(stof(topMark_1), stof(topMark_2), opera[0]));
+                        break;
+                }
+            }
+            markID_1 = getMarkID(temp, newMark);
+            if(newMark) {  //新建节点
+                buildNode(markID_1);
+            }
+            markID_3 = getMarkID(result, newMark);
+            for(int i = 1; i <= nodeCnt; i++) {
+                node[i].delAdditionMark(markID_3);
+            }
+            nodeID_1 = mark[markID_1].getNodeID();
+            node[nodeID_1].addAdditionMark(markID_3);
+            mark[markID_3].setNodeID(nodeID_1);
+        }
+        //赋值运算
+        else if(opera == "=") {
             markID_1 = getMarkID(mark_1, newMark);
             if(newMark) {  //新建节点
                 buildNode(markID_1);
@@ -380,8 +531,6 @@ public:
             }
         }
     }
-
-private:
     void check(int line = 0) {
         cout << "####### now finish line:" << line << endl << endl;
         for(int i = nodeCnt; i; i--) {
@@ -400,6 +549,8 @@ private:
         cout << "###################" << endl;
         cout << endl;
     }
+
+private:
     //获取一个标记的编号,对于第一次出现的标记自动初始化
     int getMarkID(string markString, bool& isNew) {
         if(markID.find(markString) != markID.end()) {  //已有编号
@@ -428,7 +579,7 @@ private:
     //从操作符映射到节点的主要编号，对主要标记进行运算
     string getNodeMainMarkString(string markString) {
         // return markString;
-        if(markString == "_" || checkConstKind(markString) != NOT_CONST)
+        if(markString == "_")
             return markString;
         if(markID.find(markString) == markID.end())
             return markString;
@@ -438,38 +589,51 @@ private:
     }
     //输出一个四元式,提供的是编号
     void printQuaternary(string ope, int markID_1, int markID_2, int resultID) {
-        cout << ope << '\t';
+        quatResult[quatCnt].ope = ope;
         if(markID_1 == -1)
-            cout << "_";
+            quatResult[quatCnt].mark_1 = "_";
         else
-            cout << mark[markID_1].markString;
-        cout << '\t';
+            quatResult[quatCnt].mark_1 = mark[markID_1].markString;
+
         if(markID_2 == -1)
-            cout << "_";
+            quatResult[quatCnt].mark_2 = "_";
         else
-            cout << mark[markID_2].markString;
-        cout << '\t';
-        cout << mark[resultID].markString << endl;
+            quatResult[quatCnt].mark_2 = mark[markID_2].markString;
+
+        quatResult[quatCnt].result = mark[resultID].markString;
+        quatCnt++;
     }
     //输出一个四元式,提供的是字符串
     void printQuaternary(string ope, string mark_1, string mark_2, string result) {
-        cout << ope << '\t' << mark_1 << '\t' << mark_2 << "\t" << result << endl;
+        quatResult[quatCnt].ope = ope;
+        quatResult[quatCnt].mark_1 = mark_1;
+        quatResult[quatCnt].mark_2 = mark_2;
+        quatResult[quatCnt].result = result;
+        quatCnt++;
     }
 
 } DAG;
-
-//////////////////////////////////
-
+void printResult() {
+    ofstream output("test_output.txt");
+    for(int i = 0; i < quatCnt; i++) {
+        output << quatResult[i].ope << '\t' << quatResult[i].mark_1 << '\t' << quatResult[i].mark_2 << '\t' << quatResult[i].result << endl;
+    }
+    output.close();
+}
 int main() {
-    freopen("test_input.txt", "r", stdin);
-    freopen("test_output.txt", "w", stdout);
+    // freopen("test_input.txt", "r", stdin);
+    // freopen("test_output.txt", "w", stdout);
     string ope, a, b, c;
-    while(cin >> ope) {
-        cin >> a >> b >> c;
+    ifstream quat("test_input.txt");
+    while(quat >> ope) {
+        quat >> a >> b >> c;
         DAG.addEdge(ope, a, b, c);
+        DAG.check();
     }
     // cout << endl;
     //  check();
     DAG.rebuild();
+    printResult();
+    system("pause");
     return 0;
 }
