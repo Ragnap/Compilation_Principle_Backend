@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-17 02:46:05
+ * @LastEditTime : 2022-06-17 06:27:00
  * @Description  : 四元式DAG优化程序
  */
 #include <cstdio>
@@ -17,6 +17,8 @@ const int MARK_SIZE = 1000;
 const int ADD_MARK_SIZE = 100;
 //最大四元式数量
 const int QUAT_SIZE = 1000;
+//最大分块数量
+const int BLOCK_SIZE = 1000;
 
 //单目运算符符号表
 string unaryOperatorTable[1000];
@@ -55,7 +57,6 @@ public:
         getline(synbl, input);
         getline(synbl, input);
         getline(synbl, input);
-        cout << input << endl;
         while(input.size()) {
             mark.clear();
             kind.clear();
@@ -63,7 +64,9 @@ public:
             while(input[pos] != '\t' && input[pos] != ' ') {
                 mark += input[pos++];
             }
-            pos++;
+            while(input[pos] == '\t' || input[pos] == ' ') {
+                pos++;
+            }
             while(input[pos] != '\t' && input[pos] != ' ') {
                 kind += input[pos++];
             }
@@ -77,8 +80,6 @@ public:
                 markMap[mark] = DOUBLE;
             if(kind == "float")
                 markMap[mark] = DOUBLE;
-
-            cout << mark << " " << kind << endl;
             getline(synbl, input);
         }
         synbl.close();
@@ -97,7 +98,6 @@ private:
 ConstKind checkConstKind(string str) {
     if(str == "_")
         return NOT_CONST;
-
     if(isalpha(str[0]))
         return NOT_CONST;
     else if(str[0] == '\'')
@@ -268,6 +268,13 @@ ConstKind checkMarkKind(string str) {
 // 结点类
 class Node {
 public:
+    //重置
+    void clear() {
+        mainMark = leftNodeID = rightNodeID = 0;
+        tempMainMark = 0;
+        additionMark.clear();
+        opera.clear();
+    }
     //设置主标记
     void setMainMark(int mark_ID, bool is_temp) {
         mainMark = mark_ID;
@@ -336,8 +343,6 @@ public:
         vector<Quaternary> result;
         //先标记需要用的表达式
         for(int i = nodeCnt; i; i--) {
-            if(needNode[i] == 1)
-                continue;
             bool need = needNode[i];
             need |= (!mark[node[i].getMainMark()].isTempMark());
             for(int j = 0; j < node[i].additionMark.size(); j++) {
@@ -370,7 +375,9 @@ public:
         return result;
     }
     //从输入的四元式构建DAG的一条边
-    void addEdge(string opera, string mark_1, string mark_2, string result) {
+    void addEdge(Quaternary inputQuaternary) {
+        string opera = inputQuaternary.ope, mark_1 = inputQuaternary.mark_1, mark_2 = inputQuaternary.mark_2, result = inputQuaternary.result;
+
         if(mark_1 == "_" && mark_2 != "_")
             swap(mark_1, mark_2);
         int markID_1, markID_2, markID_3;
@@ -380,8 +387,18 @@ public:
         string topMark_2 = getNodeMainMarkString(mark_2);
         ConstKind kind_1 = checkConstKind(topMark_1);
         ConstKind kind_2 = checkConstKind(topMark_2);
+        //块结束符
+        if(result == "_") {
+            //此时的mark_1会被用来判断块的转向,将其主标记need标志设为1
+            markID_1 = getMarkID(mark_1, newMark);
+            if(newMark) {  //新建节点
+                buildNode(markID_1);
+            }
+            needNode[mark[markID_1].getNodeID()] = 1;
+            return;
+        }
         //单目运算常值表达式
-        if(opera != "=" && kind_1 != NOT_CONST && mark_2 == "_") {
+        else if(opera != "=" && kind_1 != NOT_CONST && mark_2 == "_") {
             string temp;
             kind_1 = kindMap.getKind(mark_1);
             switch(kind_1) {
@@ -538,6 +555,14 @@ public:
             }
         }
     }
+    //重置DAG
+    void clear() {
+        for(int i = 0; i <= nodeCnt; i++) {
+            node[i].clear();
+            needNode[i] = 0;
+        }
+        nodeCnt = 0;
+    }
     void check(int line = 0) {
         cout << "####### now finish line:" << line << endl << endl;
         for(int i = nodeCnt; i; i--) {
@@ -572,7 +597,6 @@ private:
             return markID[markString] = markCnt++;
         }
     }
-
     //创建新节点
     void buildNode(int mainMark_ID, int leftNodeID = 0, int rightNodeID = 0, string ope = "") {
         //创建图上的新节点
@@ -601,6 +625,79 @@ private:
     //节点有效标记
     bool needNode[MARK_SIZE];
 } DAG;
+
+//////////////////////////////////分块部分//////////////////////////////
+class Block {
+public:
+    Block() {
+        clear();
+    }
+    //返回条件为真/无条件 时转向的块的ID
+    int getNextTrueID() {
+        return nextTrueID;
+    }
+    //返回条件为假时转向的块的ID
+    int getNextFalseID() {
+        return nextFalseID;
+    }
+    //重置
+    void clear() {
+        quat.clear();
+        quatCnt = 0;
+        nextTrueID = nextFalseID = -1;
+    }
+    //新加一条四元式
+    void addQuaternery(Quaternary qua) {
+        quat.push_back(qua);
+        quatCnt++;
+    }
+    //特殊的头四元式
+    void addHeadQuaternery(Quaternary header) {
+        head = header;
+    }
+    //设置条件为真/无条件的下个块编号
+    void setNextTrueID(int nextTrue) {
+        nextTrueID = nextTrue;
+    }
+    //设置条件为假的下个块编号
+    void setNextFalseID(int nextFalse) {
+        nextFalseID = nextFalse;
+    }
+    // DAG优化
+    void optimization() {
+        DAG.clear();
+        for(int i = 0; i < quatCnt; i++) {
+            DAG.addEdge(quat[i]);
+        }
+        quat = DAG.rebuild();
+        quatCnt = quat.size();
+    }
+    //输出块信息
+    void check(ofstream& output) {
+        // optimization();
+        if(head.ope.size()) {
+            output << "*(" << head.ope << '\t' << head.mark_1 << '\t' << head.mark_2 << '\t' << head.result << '\t' << ')' << endl;
+        }
+        for(int i = 0; i < quat.size(); i++) {
+            output << '(' << quat[i].ope << '\t' << quat[i].mark_1 << '\t' << quat[i].mark_2 << '\t' << quat[i].result << '\t' << ')' << endl;
+        }
+
+        output << "Ture: " << nextTrueID << "\tFalse: " << nextFalseID << endl;
+    }
+
+private:
+    //特殊的头四元式
+    Quaternary head;
+    //所有四元式
+    vector<Quaternary> quat;
+
+    //四元式记数
+    int quatCnt;
+    //条件为真/无条件 时转向的块的ID
+    int nextTrueID;
+    //条件为假时转向的块的ID
+    int nextFalseID;
+} block[BLOCK_SIZE];
 /////////////
 void printBlock(vector<Quaternary> blockResult) {
     ofstream output("test_output.txt");
@@ -610,20 +707,109 @@ void printBlock(vector<Quaternary> blockResult) {
     output.close();
 }
 /////////////
-int main() {
-    // freopen("test_input.txt", "r", stdin);
-    // freopen("test_output.txt", "w", stdout);
-    string ope, a, b, c;
-    ifstream quat("test_input.txt");
-    while(quat >> ope) {
-        quat >> a >> b >> c;
-        DAG.addEdge(ope, a, b, c);
-        DAG.check();
+class Program {
+public:
+    void readFromFile() {
+        ifstream QT("test_input.txt");
+        Quaternary que;
+        int nowline = 0;
+        bool newBlock = 0;
+        QT >> que.ope;  //读掉 "QT:"
+        while(QT >> que.ope) {
+            QT >> que.mark_1 >> que.mark_2 >> que.result;
+            allQuats[nowline] = que;
+
+            if(que.ope == "main") {
+                block[nowBlock].addHeadQuaternery(que);
+                lineBlockID[nowline] = nowBlock;
+            }
+            else if(que.ope == "wh") {
+                block[nowBlock].setNextTrueID(nowBlock + 1);
+                nowBlock++;
+                block[nowBlock].addHeadQuaternery(que);
+                lineBlockID[nowline] = nowBlock;
+            }
+            else if(que.ope == "do" || que.ope == "if") {
+                block[nowBlock].addQuaternery(que);
+                lineBlockID[nowline] = nowBlock;
+                block[nowBlock].setNextTrueID(nowBlock + 1);
+                nowBlock++;
+            }
+            else if(que.ope == "we") {
+                int whileLine;  // while语句的起始行
+                for(whileLine = nowline; whileLine >= 0; whileLine--) {
+                    if(allQuats[whileLine].ope == "do") {
+                        break;
+                    }
+                }
+                block[nowBlock].setNextTrueID(lineBlockID[whileLine]);  // do的跳转
+                block[lineBlockID[whileLine]].setNextFalseID(nowBlock + 1);
+                nowBlock++;
+                block[nowBlock].addHeadQuaternery(que);
+                lineBlockID[nowline] = nowBlock;
+            }
+            else if(que.ope == "el") {
+                int ifLine;  // if语句的起始行
+                for(ifLine = nowline; ifLine >= 0; ifLine--) {
+                    if(allQuats[ifLine].ope == "if") {
+                        break;
+                    }
+                }
+                block[nowBlock].setNextTrueID(nowBlock + 1);
+                block[lineBlockID[ifLine]].setNextFalseID(nowBlock);
+                nowBlock++;
+                block[nowBlock].addHeadQuaternery(que);
+                lineBlockID[nowline] = nowBlock;
+            }
+            else if(que.ope == "ie") {
+                int elseLine;  // else语句的起始行
+                for(elseLine = nowline - 1; elseLine >= 0; elseLine--) {
+                    if(allQuats[elseLine + 1].ope == "el") {
+                        break;
+                    }
+                }
+                block[nowBlock].setNextTrueID(nowBlock + 1);
+                block[lineBlockID[elseLine]].setNextTrueID(nowBlock + 1);
+                nowBlock++;
+                block[nowBlock].addHeadQuaternery(que);
+                lineBlockID[nowline] = nowBlock;
+            }
+            else {
+                block[nowBlock].addQuaternery(que);
+                lineBlockID[nowline] = nowBlock;
+            }
+            nowline++;
+            check();
+        }
+        quatCnt = nowline;
+        nowBlock++;
     }
-    // cout << endl;
-    //  check();
-    vector<Quaternary> ans = DAG.rebuild();
-    printBlock(ans);
+    void check() {
+        ofstream output("test_output.txt");
+        for(int i = 0; i < quatCnt; i++)
+            output << lineBlockID[i] << " ";
+        output << endl;
+        for(int i = 0; i < nowBlock; i++) {
+            output << "*** now block ID: " << i << endl;
+            block[i].check(output);
+            output << endl;
+        }
+    }
+
+private:
+    //所有四元式
+    Quaternary allQuats[QUAT_SIZE];
+    //四元式个数
+    int quatCnt;
+    //当前已分配块编号
+    int nowBlock;
+    //某一行四元式对应的块编号
+    int lineBlockID[QUAT_SIZE];
+} program;
+
+int main() {
+    program.readFromFile();
+    program.check();
     system("pause");
     return 0;
 }
