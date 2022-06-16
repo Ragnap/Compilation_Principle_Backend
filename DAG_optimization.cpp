@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-16 17:25:44
+ * @LastEditTime : 2022-06-16 18:37:05
  * @Description  : 四元式DAG优化程序
  */
 #include <iostream>
@@ -223,6 +223,8 @@ private:
 } node[MARK_SIZE];
 //节点数量
 int nodeCnt = 0;
+//节点有效数量
+bool needNode[MARK_SIZE];
 
 //获取一个标记的编号,对于第一次出现的标记自动初始化
 int getMarkID(string markString, bool& isNew) {
@@ -410,11 +412,31 @@ void printQuaternary(string ope, string mark_1, string mark_2, string result) {
     cout << ope << '\t' << mark_1 << '\t' << mark_2 << "\t" << result << endl;
 }
 //重构四元式
+
 void rebuild() {
-    for(int i = 1; i <= nodeCnt; i++) {
-        if(node[i].leftNodeID || node[i].rightNodeID) {
-            printQuaternary(node[i].opera, node[node[i].leftNodeID].getMainMark(), node[node[i].rightNodeID].getMainMark(), node[i].getMainMark());
+    //先标记需要用的表达式
+    for(int i = nodeCnt; i; i--) {
+        bool need = needNode[i];
+        need |= (!mark[node[i].getMainMark()].isTempMark());
+        for(int j = 0; j < node[i].additionMark.size(); j++) {
+            if(!mark[node[i].additionMark[j]].isTempMark()) {
+                need = 1;
+                break;
+            }
         }
+        if(need) {
+            if(node[i].leftNodeID != 0)
+                needNode[node[i].leftNodeID] = 1;
+            if(node[i].rightNodeID != 0)
+                needNode[node[i].rightNodeID] = 1;
+        }
+    }
+    //再进行输出
+    for(int i = 1; i <= nodeCnt; i++) {
+        if(needNode[i])
+            if(node[i].leftNodeID || node[i].rightNodeID) {
+                printQuaternary(node[i].opera, node[node[i].leftNodeID].getMainMark(), node[node[i].rightNodeID].getMainMark(), node[i].getMainMark());
+            }
         for(int j = 0; j < node[i].additionMark.size(); j++) {
             if(!mark[node[i].additionMark[j]].isTempMark()) {
                 printQuaternary("=", node[i].getMainMark(), -1, node[i].additionMark[j]);
@@ -430,10 +452,9 @@ int main() {
     while(cin >> ope) {
         cin >> a >> b >> c;
         addEdge(ope, a, b, c);
-        check();
     }
-    cout << endl;
-    // check();
+    // cout << endl;
+    //  check();
     rebuild();
     return 0;
 }
