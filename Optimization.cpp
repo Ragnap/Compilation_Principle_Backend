@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-17 16:04:18
+ * @LastEditTime : 2022-06-17 18:38:01
  * @Description  : 四元式DAG优化程序
  */
 #include <cstdio>
@@ -19,11 +19,8 @@ const int ADD_MARK_SIZE = 100;
 const int QUAT_SIZE = 1000;
 //最大分块数量
 const int BLOCK_SIZE = 1000;
-
-//单目运算符符号表
-string unaryOperatorTable[1000];
-//双目运算符符号表
-string binaryOperatorTable[1000];
+//寄存器数量
+const int REG_SIZE = 4;
 //////////////////////////////////四元式类//////////////////////////////
 class Quaternary {
 public:
@@ -644,11 +641,102 @@ private:
     bool needNode[MARK_SIZE];
 } DAG;
 
-//////////////////////////////////分块部分//////////////////////////////
+////////////////////////////////目标代码部分////////////////////////////
+
 //当前活跃信息描述表
 bool nowActive[MARK_SIZE];
 //活跃信息记录
 bool isActive[QUAT_SIZE][3];
+//从四元式到文法的翻译类
+class translater {
+public:
+    //加入一个块的四元式
+    void addBlock(vector<Quaternary> blockQua) {
+    }
+    //重置寄存器状态
+    void clearRegister() {
+        for(int i = 0; i < 4; i++) {
+            RDL[i] = 0;
+        }
+    }
+
+private:
+    // 寄存器分配值,-1表示不在寄存器中
+    int useRegister[3];
+    // 寄存器分配函数,分配的结果在 useRegister 中
+    void allocateRegister(Quaternary qua, int line, bool canChange) {
+        int markID_1 = markID[qua.mark_1];
+        int markID_3 = markID[qua.mark_3];
+        int R_empty = checkEmptyRegister();  // 空寄存器编号
+        int R_Mark_1 = checkInRegister(markID_1);  // mark1所在寄存器编号
+        string temp;
+        //主动释放(mark1)
+        if(registerMark_1 != 0) {
+            //活跃的话需要保留值
+            if(isActive[line][0]) {
+                //有空寄存器，移动
+                if(R_empty != -1) {
+                    temp = "ST\tR" + to_string(R_Mark_1) << "\t,R" << to_string(R_empty);
+                    RDL[R_empty] = RDL[R_Mark_1];
+                }
+                //没有，保存到外部
+                else {
+                    temp = "ST\tR" + to_string(R_Mark_1) << "\t," << qua.mark_1;
+                }
+            }
+            //释放mark_1寄存器
+            RDL[R_Mark_1] = markID_3;
+            useRegister[0] = R_Mark_1;
+            useRegister[1] = -1;
+            useRegister[2] = R_Mark_1;
+        }
+        //选空闲者
+        else if(R_empty != -1) {
+            RDL[R_empty] = markID_3;
+            useRegister[0] = R_empty;
+            useRegister[1] = -1;
+            useRegister[2] = R_empty;
+        }
+        //强迫释放(0号寄存器)
+        else {
+            //活跃的话需要保留值
+            if(isActive[line][RDL[0]]) {
+                //没有空寄存器，保存到外部
+                temp = "ST\tR" + to_string(0) << "\t," << mark[RDL[0]].markString;
+            }
+            //释放mark_1寄存器
+            RDL[0] = markID_3;
+            useRegister[0] = 0;
+            useRegister[1] = -1;
+            useRegister[2] = 0;
+        }
+    }
+    // 检测某个标记是否已经在寄存器中，有返回对应下标，否则返回-1
+    int checkInRegister(int mark_ID) {
+        for(int i = 0; i < REG_SIZE; i++) {
+            if(RDL[i] == mark_ID)
+                return i;
+        }
+        return -1;
+    }
+    // 检测是否有空寄存器中，有返回对应下标，否则返回-1
+    int checkEmptyRegister() {
+        for(int i = 0; i < REG_SIZE; i++) {
+            if(RDL[i] == 0)
+                return i;
+        }
+        return -1;
+    }
+    //寄存器
+    int RDL[REG_SIZE];
+    //生成的目标代码
+    vector<string> target;
+    //目标代码总行数
+    int targetLineNum;
+};
+
+//////////////////////////////////分块部分//////////////////////////////
+
 // 基本块类
 class Block {
 public:
@@ -766,10 +854,10 @@ private:
     int nextTrueID;
     //条件为假时转向的块的ID
     int nextFalseID;
-
 } block[BLOCK_SIZE];
 
-/////////////
+//////////////////////////////////////总交互部分
+
 class Program {
 public:
     void readFromFile() {
@@ -800,6 +888,7 @@ public:
         quatCnt = nowline;
         nowBlock++;
     }
+
     void check() {
         ofstream output("test_output.txt");
         for(int i = 0; i < quatCnt; i++)
