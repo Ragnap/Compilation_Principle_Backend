@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-17 11:52:40
+ * @LastEditTime : 2022-06-17 16:04:18
  * @Description  : 四元式DAG优化程序
  */
 #include <cstdio>
@@ -565,6 +565,7 @@ public:
                 buildNode(markID_3, nodeID_1, nodeID_2, opera);
             }
         }
+        // check();
     }
     //重置DAG
     void clear() {
@@ -576,6 +577,25 @@ public:
         }
         nodeCnt = 0;
         blockEnd.clear();
+    }
+    // DAG检查
+    void check(int line = 0) {
+        cout << "####### now finish line:" << line << endl << endl;
+        for(int i = nodeCnt; i; i--) {
+            cout << "Node id:" << i << endl;
+            cout << "l: " << node[i].leftNodeID << "  r:" << node[i].rightNodeID << endl;
+            cout << "operator: " << node[i].opera << endl;
+            cout << "have: " << mark[node[i].getMainMark()].markString << "|";
+            for(int j = 0; j < node[i].additionMark.size(); j++) {
+                cout << " " << mark[node[i].additionMark[j]].markString;
+            }
+            cout << endl << endl;
+        }
+        for(int i = 0; i < markCnt; i++) {
+            cout << mark[i].markString << "\t at \t" << mark[i].getNodeID() << endl;
+        }
+        cout << "###################" << endl;
+        cout << endl;
     }
 
 private:
@@ -625,6 +645,11 @@ private:
 } DAG;
 
 //////////////////////////////////分块部分//////////////////////////////
+//当前活跃信息描述表
+bool nowActive[MARK_SIZE];
+//活跃信息记录
+bool isActive[QUAT_SIZE][3];
+// 基本块类
 class Block {
 public:
     Block() {
@@ -671,16 +696,61 @@ public:
         quat = DAG.rebuild();
         quatCnt = quat.size();
     }
+    //求解活跃信息
+    void getActiveInfo() {
+        //遍历所有编号
+        for(int i = 0; i < quat.size(); i++) {
+            if(quat[i].mark_1 != "_" && checkConstKind(quat[i].mark_1) == NOT_CONST)
+                nowActive[markID[quat[i].mark_1]] = (quat[i].mark_1[0] != 't');
+            if(quat[i].mark_2 != "_" && checkConstKind(quat[i].mark_2) == NOT_CONST)
+                nowActive[markID[quat[i].mark_2]] = (quat[i].mark_2[0] != 't');
+            if(quat[i].result != "_" && checkConstKind(quat[i].result) == NOT_CONST)
+                nowActive[markID[quat[i].result]] = (quat[i].result[0] != 't');
+        }
+        //反向遍历所有四元式
+        for(int i = quat.size() - 1; i >= 0; i--) {
+            if(quat[i].mark_1 != "_" && checkConstKind(quat[i].mark_1) == NOT_CONST) {
+                isActive[i][0] = nowActive[markID[quat[i].mark_1]];
+                nowActive[markID[quat[i].mark_1]] = 1;
+            }
+            if(quat[i].mark_2 != "_" && checkConstKind(quat[i].mark_2) == NOT_CONST) {
+                isActive[i][1] = nowActive[markID[quat[i].mark_2]];
+                nowActive[markID[quat[i].mark_2]] = 1;
+            }
+            if(quat[i].result != "_" && checkConstKind(quat[i].result) == NOT_CONST) {
+                isActive[i][2] = nowActive[markID[quat[i].result]];
+                nowActive[markID[quat[i].result]] = 0;
+            }
+        }
+    }
     //输出块信息
     void check(ofstream& output) {
         optimization();
+        DAG.check();
+        getActiveInfo();
         if(head.ope.size()) {
             output << "*(" << head.ope << '\t' << head.mark_1 << '\t' << head.mark_2 << '\t' << head.result << '\t' << ')' << endl;
         }
         for(int i = 0; i < quat.size(); i++) {
-            output << '(' << quat[i].ope << '\t' << quat[i].mark_1 << '\t' << quat[i].mark_2 << '\t' << quat[i].result << '\t' << ')' << endl;
-        }
+            output << '(' << quat[i].ope << "    \t";
 
+            output << quat[i].mark_1;
+            if(quat[i].mark_1 != "_" && checkConstKind(quat[i].mark_1) == NOT_CONST)
+                output << "(" << isActive[i][0] << ")" << '\t';
+            else
+                output << "   \t";
+            output << quat[i].mark_2;
+            if(quat[i].mark_2 != "_" && checkConstKind(quat[i].mark_2) == NOT_CONST)
+                output << "(" << isActive[i][1] << ")" << '\t';
+            else
+                output << "   \t";
+            output << quat[i].result;
+            if(quat[i].result != "_" && checkConstKind(quat[i].result) == NOT_CONST)
+                output << "(" << isActive[i][2] << ")" << '\t';
+            else
+                output << "   \t";
+            output << ')' << endl;
+        }
         output << "Ture: " << nextTrueID << "\tFalse: " << nextFalseID << endl;
     }
 
@@ -696,7 +766,7 @@ private:
     int nextTrueID;
     //条件为假时转向的块的ID
     int nextFalseID;
-    //活动记录
+
 } block[BLOCK_SIZE];
 
 /////////////
@@ -757,6 +827,6 @@ private:
 int main() {
     program.readFromFile();
     program.check();
-    system("pause");
+    // system("pause");
     return 0;
 }
