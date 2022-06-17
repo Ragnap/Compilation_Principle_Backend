@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-17 21:46:28
+ * @LastEditTime : 2022-06-17 23:53:32
  * @Description  : 后端程序
  */
 #include <cstdio>
@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 using namespace std;
+#define DEBUG
 //最大标记数量
 const int MARK_SIZE = 1000;
 //最大附加标记数量
@@ -24,6 +25,15 @@ const int BLOCK_SIZE = 1000;
 const int REG_SIZE = 4;
 //目标代码生成路径
 const char* const TARGET_PATH = "target.txt";
+// DAG调试数据生成路径
+const char* const DEBUG_DAG_PATH = "debug/DAG.txt";
+// 活跃信息调试数据生成路径
+const char* const DEBUG_ACTIVE_PATH = "debug/active.txt";
+// 分块调试数据生成路径
+const char* const DEBUG_BLOCK_PATH = "debug/block.txt";
+// 目标语言调试数据生成路径
+const char* const DEBUG_TARGET_PATH = "debug/target.txt";
+
 //////////////////////////////////四元式类//////////////////////////////
 class Quaternary {
 public:
@@ -381,8 +391,13 @@ private:
 // DAG类
 class DAG_optimization {
 public:
+    DAG_optimization() {
+#ifdef DEBUG
+        debug.open(DEBUG_DAG_PATH);
+#endif
+    }
     //重构四元式
-    vector<Quaternary> rebuild() {
+    vector<Quaternary> generate() {
         vector<Quaternary> result;
         //先标记需要用的表达式
         for(int i = nodeCnt; i; i--) {
@@ -602,7 +617,9 @@ public:
                 buildNode(markID_3, nodeID_1, nodeID_2, opera);
             }
         }
-        // check();
+#ifdef DEBUG
+        check();
+#endif
     }
     //重置DAG
     void clear() {
@@ -615,30 +632,10 @@ public:
         nodeCnt = 0;
         blockEnd.clear();
     }
-    // DAG检查
-    void check(int line = 0) {
-        cout << "####### now finish line:" << line << endl << endl;
-        for(int i = nodeCnt; i; i--) {
-            cout << "Node id:" << i << endl;
-            cout << "l: " << node[i].leftNodeID << "  r:" << node[i].rightNodeID << endl;
-            cout << "operator: " << node[i].opera << endl;
-            cout << "have: " << mark[node[i].getMainMark()].markString << "|";
-            for(int j = 0; j < node[i].additionMark.size(); j++) {
-                cout << " " << mark[node[i].additionMark[j]].markString;
-            }
-            cout << endl << endl;
-        }
-        for(int i = 0; i < markCnt; i++) {
-            cout << mark[i].markString << "\t at \t" << mark[i].getNodeID() << endl;
-        }
-        cout << "###################" << endl;
-        cout << endl;
-    }
 
 private:
     //特殊的块结束符
     Quaternary blockEnd;
-
     //创建新节点
     void buildNode(int mainMark_ID, int leftNodeID = 0, int rightNodeID = 0, string ope = "") {
         //创建图上的新节点
@@ -666,6 +663,32 @@ private:
     int nodeCnt = 0;
     //节点有效标记
     bool needNode[MARK_SIZE];
+#ifdef DEBUG
+    // 调试用文件流
+    ofstream debug;
+    // 调试用进度追踪
+    int line;
+    // DAG检查调试用函数
+    void check() {
+        debug << "####### now finish line:" << ++line << endl;
+        for(int i = nodeCnt; i; i--) {
+            debug << "Node id:" << i << endl;
+            debug << "l: " << node[i].leftNodeID << "  r:" << node[i].rightNodeID << endl;
+            debug << "operator: " << node[i].opera << endl;
+            debug << "have: " << mark[node[i].getMainMark()].markString << "|";
+            for(int j = 0; j < node[i].additionMark.size(); j++) {
+                debug << " " << mark[node[i].additionMark[j]].markString;
+            }
+            debug << endl << endl;
+        }
+        debug << " *** mark postion:" << endl;
+        for(int i = 1; i < markCnt; i++) {
+            debug << "\t" << mark[i].markString << "\t at \t" << mark[i].getNodeID() << endl;
+        }
+        debug << "###################" << endl;
+        debug << endl;
+    }
+#endif
 } DAG;
 
 ////////////////////////////////目标代码部分////////////////////////////
@@ -677,6 +700,11 @@ bool isActive[QUAT_SIZE][3];
 //从四元式到文法的翻译类
 class Translater {
 public:
+    Translater() {
+#ifdef DEBUG
+        debug.open(DEBUG_TARGET_PATH);
+#endif
+    }
     //加入一个块的四元式
     void addBlock(vector<Quaternary> blockQua) {
         string ope, mark_1, mark_2, result, temp;
@@ -689,10 +717,12 @@ public:
             result = blockQua[line].result;
             //单目运算符
             if(mark_2 == "_" && (ope == "-" || ope == "!")) {
-                allocateRegister(blockQua[line], 0);
                 //更新活跃信息
                 nowActive[getMarkID(mark_1)] = isActive[line][0];
                 nowActive[getMarkID(result)] = isActive[line][2];
+
+                allocateRegister(blockQua[line], 0);
+
                 //保存式子
                 if(ope == "-")
                     temp = "NEG\tR" + to_string(useRegister[0]);
@@ -702,11 +732,17 @@ public:
             }
             //双目不可交换运算符
             else if(ope == "-" || ope == "/" || ope == ">=" || ope == ">" || ope == "<=" || ope == "<") {
-                allocateRegister(blockQua[line], 0);
                 //更新活跃信息
                 nowActive[getMarkID(mark_1)] = isActive[line][0];
                 nowActive[getMarkID(mark_2)] = isActive[line][1];
                 nowActive[getMarkID(result)] = isActive[line][2];
+
+                allocateRegister(blockQua[line], 0);
+
+                //如果mark_2在寄存器里，就使用寄存器
+                if(useRegister[1] != -1) {
+                    mark_2 = "R" + to_string(useRegister[1]);
+                }
                 //保存式子
                 if(ope == "-")
                     temp = "SUB\tR" + to_string(useRegister[0]) + "\t," + mark_2;
@@ -724,11 +760,17 @@ public:
             }
             //双目可交换运算符
             else if(ope == "+" || ope == "*" || ope == "==" || ope == "!=" || ope == "&&" || ope == "||") {
-                allocateRegister(blockQua[line], 0);
                 //更新活跃信息
                 nowActive[getMarkID(mark_1)] = isActive[line][0];
                 nowActive[getMarkID(mark_2)] = isActive[line][1];
                 nowActive[getMarkID(result)] = isActive[line][2];
+
+                allocateRegister(blockQua[line], 0);
+
+                //如果mark_2在寄存器里，就使用寄存器
+                if(useRegister[1] != -1) {
+                    mark_2 = "R" + to_string(useRegister[1]);
+                }
                 //保存式子
                 if(ope == "+") {
                     if(useRegister[0] != -1)
@@ -771,15 +813,19 @@ public:
 
             //赋值语句
             else if(ope == "=") {
-                allocateRegister(blockQua[line], 0);
                 //更新活跃信息
                 nowActive[getMarkID(mark_1)] = isActive[line][0];
                 nowActive[getMarkID(result)] = isActive[line][2];
+
+                allocateRegister(blockQua[line], 0);
+
                 //
                 // temp = "ST\tR" + to_string(useRegister[0]) + "\t," + result;
                 // target.push_back(temp);
             }
+#ifdef DEBUG
             check();
+#endif
         }
         //块结束时保存所有寄存器值
         for(int i = 0; i < REG_SIZE; i++) {
@@ -788,6 +834,7 @@ public:
             temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
             target.push_back(temp);
         }
+        clearRegister();
     }
     //重置寄存器状态
     void clearRegister() {
@@ -843,8 +890,9 @@ private:
             }
             //释放mark_1寄存器
             RDL[R_Mark_1] = markID_3;
+            RDL[R_Mark_2] = 0;
             useRegister[0] = R_Mark_1;
-            useRegister[1] = -1;
+            useRegister[1] = R_Mark_2;
             useRegister[2] = R_Mark_1;
         }
         //交换,主动释放(mark2)
@@ -864,8 +912,9 @@ private:
             }
             //释放mark_1寄存器
             RDL[R_Mark_2] = markID_3;
+            RDL[R_Mark_1] = 0;
             useRegister[0] = R_Mark_2;
-            useRegister[1] = -1;
+            useRegister[1] = R_Mark_1;
             useRegister[2] = R_Mark_2;
         }
         //选空闲者
@@ -874,7 +923,7 @@ private:
             target.push_back(temp);
             RDL[R_empty] = markID_3;
             useRegister[0] = R_empty;
-            useRegister[1] = -1;
+            useRegister[1] = R_Mark_2;
             useRegister[2] = R_empty;
         }
         //强迫释放(0号寄存器)
@@ -890,21 +939,11 @@ private:
             //释放0寄存器
             RDL[0] = markID_3;
             useRegister[0] = 0;
-            useRegister[1] = -1;
+            useRegister[1] = R_Mark_2;
             useRegister[2] = 0;
         }
     }
-    void check() {
-        cout << "*** target building:" << endl;
-        for(int i = 0; i < target.size(); i++) {
-            cout << target[i] << endl;
-        }
-        cout << " * the reg: \t";
-        for(int i = 0; i < REG_SIZE; i++) {
-            cout << mark[RDL[i]].markString << "\t";
-        }
-        cout << endl << endl;
-    }
+
     // 检测某个标记是否已经在寄存器中，有返回对应下标，否则返回-1
     int checkInRegister(int mark_ID) {
         for(int i = 0; i < REG_SIZE; i++) {
@@ -927,6 +966,26 @@ private:
     vector<string> target;
     //目标代码总行数
     int targetLineNum;
+#ifdef DEBUG
+    // 调试用文件流
+    ofstream debug;
+    // 调试用计数器
+    int line;
+    // 调试用函数
+    void check() {
+        debug << "########## target building: " << ++line << endl;
+        for(int i = 0; i < target.size(); i++) {
+            debug << target[i] << endl;
+        }
+        debug << endl;
+        debug << " *** the reg: \t" << endl;
+        debug << "\tR0  R1  R2  R3 " << endl;
+        for(int i = 0; i < REG_SIZE; i++) {
+            debug << "\t" << mark[RDL[i]].markString;
+        }
+        debug << endl << endl;
+    }
+#endif
 } translater;
 
 //////////////////////////////////分块部分//////////////////////////////
@@ -975,7 +1034,7 @@ public:
         for(int i = 0; i < quat.size(); i++) {
             DAG.addEdge(quat[i]);
         }
-        quat = DAG.rebuild();
+        quat = DAG.generate();
         quatCnt = quat.size();
     }
     //求解活跃信息
@@ -1011,12 +1070,27 @@ public:
                 isActive[i][2] = 0;
         }
     }
-    //输出块信息
-    void check(ofstream& output) {
+    //块内进行简化与标记活跃信息
+    void generate() {
         optimization();
-        DAG.check();
         getActiveInfo();
-
+        translater.addBlock(quat);
+    }
+#ifdef DEBUG
+    //调试用函数
+    void check(ofstream& output) {
+        output << " *** after DAG:" << endl;
+        if(head.ope.size()) {
+            output << "*(" << head.ope << '\t' << head.mark_1 << '\t' << head.mark_2 << '\t' << head.result << '\t' << ')' << endl;
+        }
+        for(int i = 0; i < quat.size(); i++) {
+            output << '(' << quat[i].ope << "\t";
+            output << quat[i].mark_1 << "\t";
+            output << quat[i].mark_2 << "\t";
+            output << quat[i].result << "\t";
+            output << ')' << endl;
+        }
+        output << endl << " *** with activity:" << endl;
         if(head.ope.size()) {
             output << "*(" << head.ope << '\t' << head.mark_1 << '\t' << head.mark_2 << '\t' << head.result << '\t' << ')' << endl;
         }
@@ -1043,24 +1117,20 @@ public:
         }
         output << "Ture: " << nextTrueID << "\tFalse: " << nextFalseID << endl;
         output << endl;
-        for(auto i: markID) {
-            output << i.first << "->" << i.second << endl;
-        }
-        translater.addBlock(quat);
     }
-
+#endif
 private:
     //特殊的头四元式
     Quaternary head;
     //所有四元式
     vector<Quaternary> quat;
-
     //四元式记数
     int quatCnt;
     //条件为真/无条件 时转向的块的ID
     int nextTrueID;
     //条件为假时转向的块的ID
     int nextFalseID;
+
 } block[BLOCK_SIZE];
 
 //////////////////////////////////////总交互部分
@@ -1095,19 +1165,13 @@ public:
         quatCnt = nowline;
         nowBlock++;
     }
-
-    void check() {
-        ofstream output("test_output.txt");
-        for(int i = 0; i < quatCnt; i++)
-            output << lineBlockID[i] << " ";
-        output << endl;
+    //遍历每个块
+    void generate() {
         for(int i = 0; i < nowBlock; i++) {
-            output << "*** now block ID: " << i << endl;
-            block[i].check(output);
-            output << endl;
+            block[i].generate();
         }
         translater.printTarget();
-        // block[1].check(output);
+        check();
     }
 
 private:
@@ -1119,11 +1183,28 @@ private:
     int nowBlock;
     //某一行四元式对应的块编号
     int lineBlockID[QUAT_SIZE];
+#ifdef DEBUG
+    //调试用文件流
+    ofstream debug;
+    //调试用函数
+    void check() {
+        debug.open(DEBUG_BLOCK_PATH);
+        debug << "line's block:" << endl;
+        for(int i = 0; i < quatCnt; i++)
+            debug << lineBlockID[i] << " ";
+        debug << endl << endl;
+        for(int i = 0; i < nowBlock; i++) {
+            debug << "########### now block ID: " << i << endl;
+            block[i].check(debug);
+            debug << endl;
+        }
+    }
+#endif
 } program;
 
 int main() {
     program.readFromFile();
-    program.check();
+    program.generate();
     system("pause");
     return 0;
 }

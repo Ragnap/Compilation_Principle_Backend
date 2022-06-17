@@ -1,0 +1,24 @@
+line's block:
+0 0 0 0 0 0 0 0 0 0 
+
+########### now block ID: 0
+ *** after DAG:
+*(main	_	_	_	)
+(=	6	_	a	)
+(=	1	_	b	)
+(-	c	d	t2	)
+(*	7	t2	t3	)
+(-	6	t3	t4	)
+(+	t4	3	x	)
+
+ *** with activity:
+*(main	_	_	_	)
+(=    	6   	_   	a(1)	)
+(=    	1   	_   	b(1)	)
+(-    	c(1)	d(1)	t2(1)	)
+(*    	7   	t2(0)	t3(1)	)
+(-    	6   	t3(0)	t4(1)	)
+(+    	t4(0)	3   	x(1)	)
+Ture: -1	False: -1
+
+
