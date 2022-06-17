@@ -1,0 +1,13 @@
+LD	R0	,6
+LD	R1	,1
+LD	R2	,c
+SUB	R2	,d
+LD	R3	,7
+MUL	R3	,t2
+ST	R0	,a
+LD	R0	,6
+SUB	R0	,t3
+ST	R0	,t4
+ADD	R0	,3
+ST	R0	,x
+ST	R1	,b

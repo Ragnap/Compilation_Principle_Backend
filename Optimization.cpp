@@ -1,10 +1,11 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-17 18:38:01
- * @Description  : 四元式DAG优化程序
+ * @LastEditTime : 2022-06-17 21:46:28
+ * @Description  : 后端程序
  */
 #include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -21,6 +22,8 @@ const int QUAT_SIZE = 1000;
 const int BLOCK_SIZE = 1000;
 //寄存器数量
 const int REG_SIZE = 4;
+//目标代码生成路径
+const char* const TARGET_PATH = "target.txt";
 //////////////////////////////////四元式类//////////////////////////////
 class Quaternary {
 public:
@@ -35,7 +38,7 @@ public:
     string mark_2;
     string result;
 };
-//输出一个四元式,提供的是字符串
+//得到一个四元式,提供的是字符串
 Quaternary buildQuaternary(string ope, string mark_1, string mark_2, string result) {
     Quaternary res;
     res.ope = ope;
@@ -43,6 +46,16 @@ Quaternary buildQuaternary(string ope, string mark_1, string mark_2, string resu
     res.mark_2 = mark_2;
     res.result = result;
     return res;
+}
+// 输出一个四元式
+void printQuaternary(ostream& out, Quaternary quat) {
+    out << '(' << quat.ope << "    \t";
+    out << "   \t";
+    out << quat.mark_2;
+    out << "   \t";
+    out << quat.result;
+    out << "   \t";
+    out << ')' << endl;
 }
 // 四元式记数
 int quatCnt = 0;
@@ -97,6 +110,7 @@ public:
 private:
     map<string, ConstKind> markMap;
 } kindMap;
+
 //判断一个字符串的常数类型
 ConstKind checkConstKind(string str) {
     if(str == "_")
@@ -257,6 +271,32 @@ private:
 map<string, int> markID;
 //标记数量
 int markCnt = 0;
+//获取一个标记的编号,对于第一次出现的标记自动初始化,若新建标记，isNew=1
+int getMarkID(string markString, bool& isNew) {
+    if(markID.find(markString) != markID.end()) {  //已有编号
+        isNew = 0;
+        return markID[markString];
+    }
+    else {
+        isNew = 1;
+        //更新标记表
+        mark[++markCnt].init(markString);
+        //分配新的标记编号
+        return markID[markString] = markCnt;
+    }
+}
+//获取一个标记的编号,对于第一次出现的标记自动初始化
+int getMarkID(string markString) {
+    if(markID.find(markString) != markID.end()) {  //已有编号
+        return markID[markString];
+    }
+    else {
+        //更新标记表
+        mark[markCnt].init(markString);
+        //分配新的标记编号
+        return markID[markString] = markCnt++;
+    }
+}
 //判断一个标号的类型
 ConstKind checkMarkKind(string str) {
     if(str == "_")
@@ -598,20 +638,7 @@ public:
 private:
     //特殊的块结束符
     Quaternary blockEnd;
-    //获取一个标记的编号,对于第一次出现的标记自动初始化
-    int getMarkID(string markString, bool& isNew) {
-        if(markID.find(markString) != markID.end()) {  //已有编号
-            isNew = 0;
-            return markID[markString];
-        }
-        else {
-            isNew = 1;
-            //更新标记表
-            mark[markCnt].init(markString);
-            //分配新的标记编号
-            return markID[markString] = markCnt++;
-        }
-    }
+
     //创建新节点
     void buildNode(int mainMark_ID, int leftNodeID = 0, int rightNodeID = 0, string ope = "") {
         //创建图上的新节点
@@ -643,46 +670,176 @@ private:
 
 ////////////////////////////////目标代码部分////////////////////////////
 
-//当前活跃信息描述表
-bool nowActive[MARK_SIZE];
+//构建时的活跃信息描述表
+bool needActive[MARK_SIZE];
 //活跃信息记录
 bool isActive[QUAT_SIZE][3];
 //从四元式到文法的翻译类
-class translater {
+class Translater {
 public:
     //加入一个块的四元式
     void addBlock(vector<Quaternary> blockQua) {
+        string ope, mark_1, mark_2, result, temp;
+        int markID_1, markID_2, markID_3;
+        clearRegister();
+        for(int line = 0; line < blockQua.size(); line++) {
+            ope = blockQua[line].ope;
+            mark_1 = blockQua[line].mark_1;
+            mark_2 = blockQua[line].mark_2;
+            result = blockQua[line].result;
+            //单目运算符
+            if(mark_2 == "_" && (ope == "-" || ope == "!")) {
+                allocateRegister(blockQua[line], 0);
+                //更新活跃信息
+                nowActive[getMarkID(mark_1)] = isActive[line][0];
+                nowActive[getMarkID(result)] = isActive[line][2];
+                //保存式子
+                if(ope == "-")
+                    temp = "NEG\tR" + to_string(useRegister[0]);
+                else if(ope == "!")
+                    temp = "NO\tR" + to_string(useRegister[0]);
+                target.push_back(temp);
+            }
+            //双目不可交换运算符
+            else if(ope == "-" || ope == "/" || ope == ">=" || ope == ">" || ope == "<=" || ope == "<") {
+                allocateRegister(blockQua[line], 0);
+                //更新活跃信息
+                nowActive[getMarkID(mark_1)] = isActive[line][0];
+                nowActive[getMarkID(mark_2)] = isActive[line][1];
+                nowActive[getMarkID(result)] = isActive[line][2];
+                //保存式子
+                if(ope == "-")
+                    temp = "SUB\tR" + to_string(useRegister[0]) + "\t," + mark_2;
+                else if(ope == "/")
+                    temp = "DIV\tR" + to_string(useRegister[0]) + "\t," + mark_2;
+                else if(ope == ">=")
+                    temp = "GE\tR," + to_string(useRegister[0]) + "\t," + mark_2;
+                else if(ope == ">")
+                    temp = "GT\tR," + to_string(useRegister[0]) + "\t," + mark_2;
+                else if(ope == "<=")
+                    temp = "LE\tR," + to_string(useRegister[0]) + "\t," + mark_2;
+                else if(ope == "<")
+                    temp = "LT\tR," + to_string(useRegister[0]) + "\t," + mark_2;
+                target.push_back(temp);
+            }
+            //双目可交换运算符
+            else if(ope == "+" || ope == "*" || ope == "==" || ope == "!=" || ope == "&&" || ope == "||") {
+                allocateRegister(blockQua[line], 0);
+                //更新活跃信息
+                nowActive[getMarkID(mark_1)] = isActive[line][0];
+                nowActive[getMarkID(mark_2)] = isActive[line][1];
+                nowActive[getMarkID(result)] = isActive[line][2];
+                //保存式子
+                if(ope == "+") {
+                    if(useRegister[0] != -1)
+                        temp = "ADD\tR" + to_string(useRegister[0]) + "\t," + mark_2;
+                    else
+                        temp = "ADD\tR" + to_string(useRegister[1]) + "\t," + mark_2;
+                }
+                else if(ope == "*") {
+                    if(useRegister[0] != -1)
+                        temp = "MUL\tR" + to_string(useRegister[0]) + "\t," + mark_2;
+                    else
+                        temp = "MUL\tR" + to_string(useRegister[1]) + "\t," + mark_2;
+                }
+                else if(ope == "==") {
+                    if(useRegister[0] != -1)
+                        temp = "EQ\tR" + to_string(useRegister[0]) + "\t," + mark_2;
+                    else
+                        temp = "EQ\tR" + to_string(useRegister[1]) + "\t," + mark_2;
+                }
+                else if(ope == "!=") {
+                    if(useRegister[0] != -1)
+                        temp = "NE\tR" + to_string(useRegister[0]) + "\t," + mark_2;
+                    else
+                        temp = "NE\tR" + to_string(useRegister[1]) + "\t," + mark_2;
+                }
+                else if(ope == "||") {
+                    if(useRegister[0] != -1)
+                        temp = "OR\tR" + to_string(useRegister[0]) + "\t," + mark_2;
+                    else
+                        temp = "OR\tR" + to_string(useRegister[1]) + "\t," + mark_2;
+                }
+                else if(ope == "&&") {
+                    if(useRegister[0] != -1)
+                        temp = "AND\tR" + to_string(useRegister[0]) + "\t," + mark_2;
+                    else
+                        temp = "AND\tR" + to_string(useRegister[1]) + "\t," + mark_2;
+                }
+                target.push_back(temp);
+            }
+
+            //赋值语句
+            else if(ope == "=") {
+                allocateRegister(blockQua[line], 0);
+                //更新活跃信息
+                nowActive[getMarkID(mark_1)] = isActive[line][0];
+                nowActive[getMarkID(result)] = isActive[line][2];
+                //
+                // temp = "ST\tR" + to_string(useRegister[0]) + "\t," + result;
+                // target.push_back(temp);
+            }
+            check();
+        }
+        //块结束时保存所有寄存器值
+        for(int i = 0; i < REG_SIZE; i++) {
+            if(mark[RDL[i]].isTempMark() || checkConstKind(mark[RDL[i]].markString))
+                continue;
+            temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
+            target.push_back(temp);
+        }
     }
     //重置寄存器状态
     void clearRegister() {
+        memset(nowActive, 0, sizeof(nowActive));
         for(int i = 0; i < 4; i++) {
             RDL[i] = 0;
         }
     }
+    //输出所有值
+    void printTarget() {
+        ofstream out(TARGET_PATH);
+        for(int i = 0; i < target.size(); i++) {
+            out << target[i] << endl;
+        }
+    }
 
 private:
+    //当前活跃信息描述表
+    bool nowActive[MARK_SIZE];
     // 寄存器分配值,-1表示不在寄存器中
     int useRegister[3];
     // 寄存器分配函数,分配的结果在 useRegister 中
-    void allocateRegister(Quaternary qua, int line, bool canChange) {
-        int markID_1 = markID[qua.mark_1];
-        int markID_3 = markID[qua.mark_3];
-        int R_empty = checkEmptyRegister();  // 空寄存器编号
-        int R_Mark_1 = checkInRegister(markID_1);  // mark1所在寄存器编号
+    void allocateRegister(Quaternary qua, bool canChange = 0) {
+        int markID_1, markID_2, markID_3;
+        int R_empty, R_Mark_1, R_Mark_2;  // 标志所在寄存器编号
+
+        markID_3 = getMarkID(qua.result);
+        R_empty = checkEmptyRegister();  // 空寄存器编号
+
+        markID_1 = getMarkID(qua.mark_1);
+        R_Mark_1 = checkInRegister(markID_1);
+
+        if(qua.mark_2 != "_") {
+            markID_2 = getMarkID(qua.mark_2);
+            R_Mark_2 = checkInRegister(markID_2);
+        }
+
         string temp;
-        //主动释放(mark1)
-        if(registerMark_1 != 0) {
+        //不交换,主动释放(mark1)
+        if(R_Mark_1 != -1) {
             //活跃的话需要保留值
-            if(isActive[line][0]) {
+            if(nowActive[markID_1]) {
                 //有空寄存器，移动
                 if(R_empty != -1) {
-                    temp = "ST\tR" + to_string(R_Mark_1) << "\t,R" << to_string(R_empty);
+                    temp = "ST\tR" + to_string(R_Mark_1) + "\t,R" + to_string(R_empty);
                     RDL[R_empty] = RDL[R_Mark_1];
                 }
                 //没有，保存到外部
                 else {
-                    temp = "ST\tR" + to_string(R_Mark_1) << "\t," << qua.mark_1;
+                    temp = "ST\tR" + to_string(R_Mark_1) + "\t," + qua.mark_1;
                 }
+                target.push_back(temp);
             }
             //释放mark_1寄存器
             RDL[R_Mark_1] = markID_3;
@@ -690,8 +847,31 @@ private:
             useRegister[1] = -1;
             useRegister[2] = R_Mark_1;
         }
+        //交换,主动释放(mark2)
+        else if(canChange && R_Mark_2 != -1) {
+            //活跃的话需要保留值
+            if(nowActive[markID_2]) {
+                //有空寄存器，移动
+                if(R_empty != -1) {
+                    temp = "ST\tR" + to_string(R_Mark_2) + "\t,R" + to_string(R_empty);
+                    RDL[R_empty] = RDL[R_Mark_2];
+                }
+                //没有，保存到外部
+                else {
+                    temp = "ST\tR" + to_string(R_Mark_2) + "\t," + qua.mark_2;
+                }
+                target.push_back(temp);
+            }
+            //释放mark_1寄存器
+            RDL[R_Mark_2] = markID_3;
+            useRegister[0] = R_Mark_2;
+            useRegister[1] = -1;
+            useRegister[2] = R_Mark_2;
+        }
         //选空闲者
         else if(R_empty != -1) {
+            temp = "LD\tR" + to_string(R_empty) + "\t," + qua.mark_1;
+            target.push_back(temp);
             RDL[R_empty] = markID_3;
             useRegister[0] = R_empty;
             useRegister[1] = -1;
@@ -700,16 +880,30 @@ private:
         //强迫释放(0号寄存器)
         else {
             //活跃的话需要保留值
-            if(isActive[line][RDL[0]]) {
+            if(nowActive[RDL[0]]) {
                 //没有空寄存器，保存到外部
-                temp = "ST\tR" + to_string(0) << "\t," << mark[RDL[0]].markString;
+                temp = "ST\tR" + to_string(0) + "\t," + mark[RDL[0]].markString;
+                target.push_back(temp);
             }
-            //释放mark_1寄存器
+            temp = "LD\tR0\t," + qua.mark_1;
+            target.push_back(temp);
+            //释放0寄存器
             RDL[0] = markID_3;
             useRegister[0] = 0;
             useRegister[1] = -1;
             useRegister[2] = 0;
         }
+    }
+    void check() {
+        cout << "*** target building:" << endl;
+        for(int i = 0; i < target.size(); i++) {
+            cout << target[i] << endl;
+        }
+        cout << " * the reg: \t";
+        for(int i = 0; i < REG_SIZE; i++) {
+            cout << mark[RDL[i]].markString << "\t";
+        }
+        cout << endl << endl;
     }
     // 检测某个标记是否已经在寄存器中，有返回对应下标，否则返回-1
     int checkInRegister(int mark_ID) {
@@ -727,13 +921,13 @@ private:
         }
         return -1;
     }
-    //寄存器
+    //寄存器,内为标记编号
     int RDL[REG_SIZE];
     //生成的目标代码
     vector<string> target;
     //目标代码总行数
     int targetLineNum;
-};
+} translater;
 
 //////////////////////////////////分块部分//////////////////////////////
 
@@ -789,26 +983,32 @@ public:
         //遍历所有编号
         for(int i = 0; i < quat.size(); i++) {
             if(quat[i].mark_1 != "_" && checkConstKind(quat[i].mark_1) == NOT_CONST)
-                nowActive[markID[quat[i].mark_1]] = (quat[i].mark_1[0] != 't');
+                needActive[markID[quat[i].mark_1]] = (quat[i].mark_1[0] != 't');
             if(quat[i].mark_2 != "_" && checkConstKind(quat[i].mark_2) == NOT_CONST)
-                nowActive[markID[quat[i].mark_2]] = (quat[i].mark_2[0] != 't');
+                needActive[markID[quat[i].mark_2]] = (quat[i].mark_2[0] != 't');
             if(quat[i].result != "_" && checkConstKind(quat[i].result) == NOT_CONST)
-                nowActive[markID[quat[i].result]] = (quat[i].result[0] != 't');
+                needActive[markID[quat[i].result]] = (quat[i].result[0] != 't');
         }
         //反向遍历所有四元式
         for(int i = quat.size() - 1; i >= 0; i--) {
             if(quat[i].mark_1 != "_" && checkConstKind(quat[i].mark_1) == NOT_CONST) {
-                isActive[i][0] = nowActive[markID[quat[i].mark_1]];
-                nowActive[markID[quat[i].mark_1]] = 1;
+                isActive[i][0] = needActive[markID[quat[i].mark_1]];
+                needActive[markID[quat[i].mark_1]] = 1;
             }
+            else
+                isActive[i][0] = 0;
             if(quat[i].mark_2 != "_" && checkConstKind(quat[i].mark_2) == NOT_CONST) {
-                isActive[i][1] = nowActive[markID[quat[i].mark_2]];
-                nowActive[markID[quat[i].mark_2]] = 1;
+                isActive[i][1] = needActive[markID[quat[i].mark_2]];
+                needActive[markID[quat[i].mark_2]] = 1;
             }
+            else
+                isActive[i][1] = 0;
             if(quat[i].result != "_" && checkConstKind(quat[i].result) == NOT_CONST) {
-                isActive[i][2] = nowActive[markID[quat[i].result]];
-                nowActive[markID[quat[i].result]] = 0;
+                isActive[i][2] = needActive[markID[quat[i].result]];
+                needActive[markID[quat[i].result]] = 0;
             }
+            else
+                isActive[i][2] = 0;
         }
     }
     //输出块信息
@@ -816,9 +1016,11 @@ public:
         optimization();
         DAG.check();
         getActiveInfo();
+
         if(head.ope.size()) {
             output << "*(" << head.ope << '\t' << head.mark_1 << '\t' << head.mark_2 << '\t' << head.result << '\t' << ')' << endl;
         }
+
         for(int i = 0; i < quat.size(); i++) {
             output << '(' << quat[i].ope << "    \t";
 
@@ -840,6 +1042,11 @@ public:
             output << ')' << endl;
         }
         output << "Ture: " << nextTrueID << "\tFalse: " << nextFalseID << endl;
+        output << endl;
+        for(auto i: markID) {
+            output << i.first << "->" << i.second << endl;
+        }
+        translater.addBlock(quat);
     }
 
 private:
@@ -899,6 +1106,7 @@ public:
             block[i].check(output);
             output << endl;
         }
+        translater.printTarget();
         // block[1].check(output);
     }
 
@@ -916,6 +1124,6 @@ private:
 int main() {
     program.readFromFile();
     program.check();
-    // system("pause");
+    system("pause");
     return 0;
 }
