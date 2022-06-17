@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-17 06:54:57
+ * @LastEditTime : 2022-06-17 11:52:40
  * @Description  : 四元式DAG优化程序
  */
 #include <cstdio>
@@ -696,15 +696,9 @@ private:
     int nextTrueID;
     //条件为假时转向的块的ID
     int nextFalseID;
+    //活动记录
 } block[BLOCK_SIZE];
-/////////////
-void printBlock(vector<Quaternary> blockResult) {
-    ofstream output("test_output.txt");
-    for(int i = 0; i < blockResult.size(); i++) {
-        output << blockResult[i].ope << '\t' << blockResult[i].mark_1 << '\t' << blockResult[i].mark_2 << '\t' << blockResult[i].result << endl;
-    }
-    output.close();
-}
+
 /////////////
 class Program {
 public:
@@ -722,60 +716,14 @@ public:
                 block[nowBlock].addHeadQuaternery(que);
                 lineBlockID[nowline] = nowBlock;
             }
-            else if(que.ope == "wh") {
-                block[nowBlock].setNextTrueID(nowBlock + 1);
-                nowBlock++;
-                block[nowBlock].addHeadQuaternery(que);
-                lineBlockID[nowline] = nowBlock;
-            }
-            else if(que.ope == "do" || que.ope == "if") {
+            else if(que.result != "_" || que.ope == "wh") {
                 block[nowBlock].addQuaternery(que);
                 lineBlockID[nowline] = nowBlock;
-                block[nowBlock].setNextTrueID(nowBlock + 1);
-                nowBlock++;
             }
-            else if(que.ope == "we") {
-                int whileLine;  // while语句的起始行
-                for(whileLine = nowline; whileLine >= 0; whileLine--) {
-                    if(allQuats[whileLine].ope == "do") {
-                        break;
-                    }
-                }
-                block[nowBlock].setNextTrueID(lineBlockID[whileLine]);  // do的跳转
-                block[lineBlockID[whileLine]].setNextFalseID(nowBlock + 1);
-                nowBlock++;
-                block[nowBlock].addHeadQuaternery(que);
-                lineBlockID[nowline] = nowBlock;
-            }
-            else if(que.ope == "el") {
-                int ifLine;  // if语句的起始行
-                for(ifLine = nowline; ifLine >= 0; ifLine--) {
-                    if(allQuats[ifLine].ope == "if") {
-                        break;
-                    }
-                }
-                block[nowBlock].setNextTrueID(nowBlock + 1);
-                block[lineBlockID[ifLine]].setNextFalseID(nowBlock);
-                nowBlock++;
-                block[nowBlock].addHeadQuaternery(que);
-                lineBlockID[nowline] = nowBlock;
-            }
-            else if(que.ope == "ie") {
-                int elseLine;  // else语句的起始行
-                for(elseLine = nowline - 1; elseLine >= 0; elseLine--) {
-                    if(allQuats[elseLine + 1].ope == "el") {
-                        break;
-                    }
-                }
-                block[nowBlock].setNextTrueID(nowBlock + 1);
-                block[lineBlockID[elseLine]].setNextTrueID(nowBlock + 1);
-                nowBlock++;
-                block[nowBlock].addHeadQuaternery(que);
-                lineBlockID[nowline] = nowBlock;
-            }
-            else {
+            else if(que.ope == "if" || que.ope == "el" || que.ope == "ie" || que.ope == "do" || que.ope == "we") {
                 block[nowBlock].addQuaternery(que);
                 lineBlockID[nowline] = nowBlock;
+                nowBlock++;
             }
             nowline++;
         }

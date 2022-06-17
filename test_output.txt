@@ -1,34 +1,21 @@
-0 0 1 1 1 2 2 4 5 6 6 6 6 6 
+0 0 0 1 1 1 2 2 2 3 3 3 0 
 *** now block ID: 0
 *(main	_	_	_	)
 (=	7	_	a	)
-Ture: 1	False: -1
+(if	a	_	_	)
+Ture: -1	False: -1
 
 *** now block ID: 1
-*(wh	_	_	_	)
-(<	a	9	t1	)
-(do	t1	_	_	)
-Ture: 2	False: 6
+(+	a	9	a	)
+(el	_	_	_	)
+Ture: -1	False: -1
 
 *** now block ID: 2
-(==	a	9	t2	)
-(if	t2	_	_	)
-Ture: 5	False: 3
+(-	a	1	a	)
+(ie	_	_	_	)
+Ture: -1	False: -1
 
 *** now block ID: 3
-Ture: 4	False: -1
-
-*** now block ID: 4
-*(el	_	_	_	)
-Ture: 5	False: -1
-
-*** now block ID: 5
-*(ie	_	_	_	)
-Ture: 1	False: -1
-
-*** now block ID: 6
-*(we	_	_	_	)
 (+	9	b	c	)
-(end	_	_	_	)
 Ture: -1	False: -1
 
