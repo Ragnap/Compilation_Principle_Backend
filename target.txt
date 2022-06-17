@@ -1,0 +1,12 @@
+0	:	LD	R0	,7
+1	:	ST	R0	,a
+2	:	LD	R0	,t1
+3	:	FJ	R0	,8
+4	:	LD	R0	,a
+5	:	ADD	R0	,1
+6	:	ST	R0	,a
+7	:	JMP	_	,10
+8	:	LD	R0	,9
+9	:	ST	R0	,a
+10	:	LD	R0	,9
+11	:	ADD	R0	,b

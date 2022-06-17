@@ -9,15 +9,32 @@ have: 7| a
 ###################
 
 ####### now finish line:2
+Node id:2
+l: 0  r:0
+operator: 
+have: 1| t1
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 7| a
+
+ *** mark postion:
+	7	 at 	1
+	a	 at 	1
+	1	 at 	2
+###################
+
+####### now finish line:3
 Node id:3
 l: 1  r:2
-operator: ==
-have: t1|
+operator: +
+have: t2|
 
 Node id:2
 l: 0  r:0
 operator: 
-have: 7|
+have: 1|
 
 Node id:1
 l: 0  r:0
@@ -26,10 +43,41 @@ have: a|
 
  *** mark postion:
 	a	 at 	1
-	7	 at 	2
+	1	 at 	2
 ###################
 
-####### now finish line:3
+####### now finish line:4
+Node id:3
+l: 1  r:2
+operator: +
+have: a| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 1|
+
+Node id:1
+l: 0  r:0
+operator: 
+have: a|
+
+ *** mark postion:
+	a	 at 	3
+	1	 at 	2
+###################
+
+####### now finish line:5
+Node id:1
+l: 0  r:0
+operator: 
+have: 9| a
+
+ *** mark postion:
+	9	 at 	1
+###################
+
+####### now finish line:6
 Node id:1
 l: 0  r:0
 operator: 
@@ -39,11 +87,11 @@ have: 9| c
 	9	 at 	1
 ###################
 
-####### now finish line:4
+####### now finish line:7
 Node id:3
 l: 1  r:2
 operator: +
-have: t2|
+have: t3|
 
 Node id:2
 l: 0  r:0
@@ -61,11 +109,11 @@ have: 9| c
 	b	 at 	2
 ###################
 
-####### now finish line:5
+####### now finish line:8
 Node id:3
 l: 1  r:2
 operator: +
-have: c| t2
+have: c| t3
 
 Node id:2
 l: 0  r:0

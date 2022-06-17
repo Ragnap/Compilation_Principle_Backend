@@ -1,0 +1,110 @@
+########## target building: 1
+LD	R0	,7
+
+ *** the reg: 	
+	R0  R1  R2  R3 
+	a			
+
+########## target building: 2
+LD	R0	,7
+ST	R0	,a
+LD	R0	,t1
+FJ	R0	,
+
+ *** the reg: 	
+	R0  R1  R2  R3 
+				
+
+########## target building: 3
+LD	R0	,7
+ST	R0	,a
+LD	R0	,t1
+FJ	R0	,
+LD	R0	,a
+ADD	R0	,1
+
+ *** the reg: 	
+	R0  R1  R2  R3 
+	a			
+
+########## target building: 4
+LD	R0	,7
+ST	R0	,a
+LD	R0	,t1
+FJ	R0	,8
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,
+
+ *** the reg: 	
+	R0  R1  R2  R3 
+				
+
+########## target building: 5
+LD	R0	,7
+ST	R0	,a
+LD	R0	,t1
+FJ	R0	,8
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,
+LD	R0	,9
+
+ *** the reg: 	
+	R0  R1  R2  R3 
+	a			
+
+########## target building: 6
+LD	R0	,7
+ST	R0	,a
+LD	R0	,t1
+FJ	R0	,8
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,10
+LD	R0	,9
+ST	R0	,a
+
+ *** the reg: 	
+	R0  R1  R2  R3 
+				
+
+########## target building: 7
+LD	R0	,7
+ST	R0	,a
+LD	R0	,t1
+FJ	R0	,8
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,10
+LD	R0	,9
+ST	R0	,a
+LD	R0	,9
+ADD	R0	,b
+
+ *** the reg: 	
+	R0  R1  R2  R3 
+	c			
+
+########## target building: 8
+LD	R0	,7
+ST	R0	,a
+LD	R0	,t1
+FJ	R0	,8
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,10
+LD	R0	,9
+ST	R0	,a
+LD	R0	,9
+ADD	R0	,b
+
+ *** the reg: 	
+	R0  R1  R2  R3 
+	c			
+

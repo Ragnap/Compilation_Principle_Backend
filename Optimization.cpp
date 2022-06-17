@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-18 00:14:18
+ * @LastEditTime : 2022-06-18 01:40:26
  * @Description  : 后端程序
  */
 #include <cstdio>
@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <stack>
 #include <string>
 #include <vector>
 using namespace std;
@@ -706,11 +707,11 @@ public:
 #ifdef DEBUG
         debug.open(DEBUG_TARGET_PATH);
 #endif
+        targetLineNum = 0;
     }
     //加入一个块的四元式
     void addBlock(vector<Quaternary> blockQua) {
         string ope, mark_1, mark_2, result, temp;
-        int markID_1, markID_2, markID_3;
         clearRegister();
         for(int line = 0; line < blockQua.size(); line++) {
             ope = blockQua[line].ope;
@@ -731,6 +732,7 @@ public:
                 else if(ope == "!")
                     temp = "NO\tR" + to_string(useRegister[0]);
                 target.push_back(temp);
+                targetLineNum++;
             }
             //双目不可交换运算符
             else if(ope == "-" || ope == "/" || ope == ">=" || ope == ">" || ope == "<=" || ope == "<") {
@@ -759,6 +761,7 @@ public:
                 else if(ope == "<")
                     temp = "LT\tR," + to_string(useRegister[0]) + "\t," + mark_2;
                 target.push_back(temp);
+                targetLineNum++;
             }
             //双目可交换运算符
             else if(ope == "+" || ope == "*" || ope == "==" || ope == "!=" || ope == "&&" || ope == "||") {
@@ -811,8 +814,8 @@ public:
                         temp = "AND\tR" + to_string(useRegister[1]) + "\t," + mark_2;
                 }
                 target.push_back(temp);
+                targetLineNum++;
             }
-
             //赋值语句
             else if(ope == "=") {
                 //更新活跃信息
@@ -825,16 +828,145 @@ public:
                 // temp = "ST\tR" + to_string(useRegister[0]) + "\t," + result;
                 // target.push_back(temp);
             }
+            else if(ope == "if") {
+                //块结束时保存所有寄存器值
+                for(int i = 0; i < REG_SIZE; i++) {
+                    if(mark[RDL[i]].isTempMark() || checkConstKind(mark[RDL[i]].markString))
+                        continue;
+                    temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
+                    target.push_back(temp);
+                    targetLineNum++;
+                }
+                //检测是否有寄存器有对应值
+                int pos = -1;
+                for(int i = 0; i < REG_SIZE; i++) {
+                    if(RDL[i] == getMarkID(mark_1)) {
+                        pos = i;
+                        break;
+                    }
+                }
+                //如果没有就读到R0
+                if(pos == -1) {
+                    temp = "LD\tR0\t," + mark_1;
+                    target.push_back(temp);
+                    targetLineNum++;
+                    pos = 0;
+                }
+                //跳转
+                temp = "FJ\tR" + to_string(pos) + "\t,";
+                target.push_back(temp);
+                waitingIF.push(targetLineNum);
+                targetLineNum++;
+                clearRegister();
+            }
+            else if(ope == "el") {
+                // 块结束时保存所有寄存器值
+                for(int i = 0; i < REG_SIZE; i++) {
+                    if(mark[RDL[i]].isTempMark() || checkConstKind(mark[RDL[i]].markString))
+                        continue;
+                    temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
+                    target.push_back(temp);
+                    targetLineNum++;
+                }
+                //填写上一个if的跳转位置
+                int last = waitingIF.top();
+                waitingIF.pop();
+                target[last] += to_string(targetLineNum + 1);
+
+                //当前el等待填写
+                temp = "JMP\t_\t,";
+                target.push_back(temp);
+                waitingEL.push(targetLineNum);
+                targetLineNum++;
+                clearRegister();
+            }
+            else if(ope == "ie") {
+                // 块结束时保存所有寄存器值
+                for(int i = 0; i < REG_SIZE; i++) {
+                    if(mark[RDL[i]].isTempMark() || checkConstKind(mark[RDL[i]].markString))
+                        continue;
+                    temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
+                    target.push_back(temp);
+                    targetLineNum++;
+                }
+                //填写上一个el的跳转位置
+                int last = waitingEL.top();
+                waitingEL.pop();
+                target[last] += to_string(targetLineNum);
+
+                clearRegister();
+            }
+            else if(ope == "wh") {
+                // 块结束时保存所有寄存器值
+                for(int i = 0; i < REG_SIZE; i++) {
+                    if(mark[RDL[i]].isTempMark() || checkConstKind(mark[RDL[i]].markString))
+                        continue;
+                    temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
+                    target.push_back(temp);
+                    targetLineNum++;
+                }
+                //当前wh等待填写
+                waitingWH.push(targetLineNum);
+                targetLineNum++;
+                clearRegister();
+            }
+            else if(ope == "do") {
+                // 块结束时保存所有寄存器值
+                for(int i = 0; i < REG_SIZE; i++) {
+                    if(mark[RDL[i]].isTempMark() || checkConstKind(mark[RDL[i]].markString))
+                        continue;
+                    temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
+                    target.push_back(temp);
+                    targetLineNum++;
+                }
+                // 检测是否有寄存器有对应值
+                int pos = -1;
+                for(int i = 0; i < REG_SIZE; i++) {
+                    if(RDL[i] == getMarkID(mark_1)) {
+                        pos = i;
+                        break;
+                    }
+                }
+                // 如果没有就读到R0
+                if(pos == -1) {
+                    temp = "LD\tR0\t," + mark_1;
+                    target.push_back(temp);
+                    targetLineNum++;
+                    pos = 0;
+                }
+                // do跳转待填写
+                temp = "FJ\tR" + to_string(pos) + "\t,";
+                target.push_back(temp);
+                waitingDO.push(targetLineNum - 1);
+                targetLineNum++;
+                clearRegister();
+            }
+            else if(ope == "we") {
+                // 块结束时保存所有寄存器值
+                for(int i = 0; i < REG_SIZE; i++) {
+                    if(mark[RDL[i]].isTempMark() || checkConstKind(mark[RDL[i]].markString))
+                        continue;
+                    temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
+                    target.push_back(temp);
+                    targetLineNum++;
+                }
+                //填写上一个do的跳转位置
+                int last = waitingDO.top();
+                waitingDO.pop();
+                target[last] += to_string(targetLineNum);
+
+                //当前we跳转到上一个wh
+                temp = "JMP\t_\t," + to_string(waitingWH.top());
+                waitingWH.pop();
+                target.push_back(temp);
+                targetLineNum++;
+
+                clearRegister();
+            }
+
 #ifdef DEBUG
             check();
 #endif
-        }
-        //块结束时保存所有寄存器值
-        for(int i = 0; i < REG_SIZE; i++) {
-            if(mark[RDL[i]].isTempMark() || checkConstKind(mark[RDL[i]].markString))
-                continue;
-            temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
-            target.push_back(temp);
         }
         clearRegister();
     }
@@ -849,11 +981,16 @@ public:
     void printTarget() {
         ofstream out(TARGET_PATH);
         for(int i = 0; i < target.size(); i++) {
-            out << target[i] << endl;
+            out << i << "\t:\t" << target[i] << endl;
         }
     }
 
 private:
+    //跳转表
+    stack<int> waitingIF;
+    stack<int> waitingEL;
+    stack<int> waitingWH;
+    stack<int> waitingDO;
     //当前活跃信息描述表
     bool nowActive[MARK_SIZE];
     // 寄存器分配值,-1表示不在寄存器中
@@ -889,6 +1026,7 @@ private:
                     temp = "ST\tR" + to_string(R_Mark_1) + "\t," + qua.mark_1;
                 }
                 target.push_back(temp);
+                targetLineNum++;
             }
             //释放mark_1寄存器
             RDL[R_Mark_1] = markID_3;
@@ -911,6 +1049,7 @@ private:
                     temp = "ST\tR" + to_string(R_Mark_2) + "\t," + qua.mark_2;
                 }
                 target.push_back(temp);
+                targetLineNum++;
             }
             //释放mark_1寄存器
             RDL[R_Mark_2] = markID_3;
@@ -923,6 +1062,7 @@ private:
         else if(R_empty != -1) {
             temp = "LD\tR" + to_string(R_empty) + "\t," + qua.mark_1;
             target.push_back(temp);
+            targetLineNum++;
             RDL[R_empty] = markID_3;
             useRegister[0] = R_empty;
             useRegister[1] = R_Mark_2;
@@ -935,9 +1075,11 @@ private:
                 //没有空寄存器，保存到外部
                 temp = "ST\tR" + to_string(0) + "\t," + mark[RDL[0]].markString;
                 target.push_back(temp);
+                targetLineNum++;
             }
             temp = "LD\tR0\t," + qua.mark_1;
             target.push_back(temp);
+            targetLineNum++;
             //释放0寄存器
             RDL[0] = markID_3;
             useRegister[0] = 0;
@@ -1076,7 +1218,7 @@ public:
     void generate() {
         optimization();
         getActiveInfo();
-        // translater.addBlock(quat);
+        translater.addBlock(quat);
     }
 #ifdef DEBUG
     //调试用函数
@@ -1161,6 +1303,10 @@ public:
                 block[nowBlock].addQuaternery(que);
                 lineBlockID[nowline] = nowBlock;
                 nowBlock++;
+            }
+            else if(que.ope == "end") {
+                block[nowBlock].addQuaternery(que);
+                lineBlockID[nowline] = nowBlock;
             }
             nowline++;
         }

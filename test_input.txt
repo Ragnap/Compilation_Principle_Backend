@@ -1,15 +1,15 @@
 Qt:
 main	_	_	_
 =	7	_	a
-wh	_	_	_
 ==	a	7	t1
-do	t1	_	_
-if	a	_	_
+if	t1	_	_
++	a	1	t2
+=	t2	_	a
 el	_	_	_
+=	9	_	a
 ie	_	_	_
-we	_	_	_
 =	9	_	c
-+	c	b	t2
-=	t2	_	c
++	c	b	t3
+=	t3	_	c
 end	_	_	_
 
