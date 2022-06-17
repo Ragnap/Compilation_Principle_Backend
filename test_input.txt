@@ -1,12 +1,15 @@
 Qt:
 main	_	_	_
-=   6   _   a
-=   1   _   b
-+   a   b   t1
--   c   d   t2
-*   t1  t2  t3
--   a   t3  t4
-/   t1  2   t5
-+   t4  t5  x
+=	7	_	a
+wh	_	_	_
+==	a	7	t1
+do	t1	_	_
+if	a	_	_
+el	_	_	_
+ie	_	_	_
+we	_	_	_
+=	9	_	c
++	c	b	t2
+=	t2	_	c
 end	_	_	_
 

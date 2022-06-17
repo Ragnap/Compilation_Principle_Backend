@@ -1,24 +1,72 @@
 line's block:
-0 0 0 0 0 0 0 0 0 0 
+0 0 0 1 1 2 3 4 5 6 6 6 0 
 
 ########### now block ID: 0
  *** after DAG:
 *(main	_	_	_	)
-(=	6	_	a	)
-(=	1	_	b	)
-(-	c	d	t2	)
-(*	7	t2	t3	)
-(-	6	t3	t4	)
-(+	t4	3	x	)
+(=	7	_	a	)
+(wh	_	_	_	)
 
  *** with activity:
 *(main	_	_	_	)
-(=    	6   	_   	a(1)	)
-(=    	1   	_   	b(1)	)
-(-    	c(1)	d(1)	t2(1)	)
-(*    	7   	t2(0)	t3(1)	)
-(-    	6   	t3(0)	t4(1)	)
-(+    	t4(0)	3   	x(1)	)
+(=    	7   	_   	a(1)	)
+(wh    	_   	_   	_   	)
+Ture: -1	False: -1
+
+
+########### now block ID: 1
+ *** after DAG:
+(==	a	7	t1	)
+(do	t1	_	_	)
+
+ *** with activity:
+(==    	a(0)	7   	t1(1)	)
+(do    	t1(0)	_   	_   	)
+Ture: -1	False: -1
+
+
+########### now block ID: 2
+ *** after DAG:
+(if	a	_	_	)
+
+ *** with activity:
+(if    	a(0)	_   	_   	)
+Ture: -1	False: -1
+
+
+########### now block ID: 3
+ *** after DAG:
+(el	_	_	_	)
+
+ *** with activity:
+(el    	_   	_   	_   	)
+Ture: -1	False: -1
+
+
+########### now block ID: 4
+ *** after DAG:
+(ie	_	_	_	)
+
+ *** with activity:
+(ie    	_   	_   	_   	)
+Ture: -1	False: -1
+
+
+########### now block ID: 5
+ *** after DAG:
+(we	_	_	_	)
+
+ *** with activity:
+(we    	_   	_   	_   	)
+Ture: -1	False: -1
+
+
+########### now block ID: 6
+ *** after DAG:
+(+	9	b	c	)
+
+ *** with activity:
+(+    	9   	b(1)	c(1)	)
 Ture: -1	False: -1
 
 

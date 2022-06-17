@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-17 23:53:32
+ * @LastEditTime : 2022-06-18 00:14:18
  * @Description  : 后端程序
  */
 #include <cstdio>
@@ -451,12 +451,14 @@ public:
         ConstKind kind_2 = checkConstKind(topMark_2);
         //块结束符
         if(result == "_") {
-            //此时的mark_1会被用来判断块的转向,将其主标记need标志设为1
-            markID_1 = getMarkID(mark_1, newMark);
-            if(newMark) {  //新建节点
-                buildNode(markID_1);
+            if(mark_1 != "_") {
+                //此时的mark_1会被用来判断块的转向,将其主标记need标志设为1
+                markID_1 = getMarkID(mark_1, newMark);
+                if(newMark) {  //新建节点
+                    buildNode(markID_1);
+                }
+                needNode[mark[markID_1].getNodeID()] = 1;
             }
-            needNode[mark[markID_1].getNodeID()] = 1;
             blockEnd = inputQuaternary;
             return;
         }
@@ -1074,7 +1076,7 @@ public:
     void generate() {
         optimization();
         getActiveInfo();
-        translater.addBlock(quat);
+        // translater.addBlock(quat);
     }
 #ifdef DEBUG
     //调试用函数
@@ -1151,11 +1153,11 @@ public:
                 block[nowBlock].addHeadQuaternery(que);
                 lineBlockID[nowline] = nowBlock;
             }
-            else if(que.result != "_" || que.ope == "wh") {
+            else if(que.result != "_") {
                 block[nowBlock].addQuaternery(que);
                 lineBlockID[nowline] = nowBlock;
             }
-            else if(que.ope == "if" || que.ope == "el" || que.ope == "ie" || que.ope == "do" || que.ope == "we") {
+            else if(que.ope == "if" || que.ope == "wh" || que.ope == "el" || que.ope == "ie" || que.ope == "do" || que.ope == "we") {
                 block[nowBlock].addQuaternery(que);
                 lineBlockID[nowline] = nowBlock;
                 nowBlock++;
