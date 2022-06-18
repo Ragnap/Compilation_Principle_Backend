@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-18 01:40:26
+ * @LastEditTime : 2022-06-18 09:41:12
  * @Description  : 后端程序
  */
 #include <cstdio>
@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <stack>
 #include <string>
 #include <vector>
@@ -24,6 +25,10 @@ const int QUAT_SIZE = 1000;
 const int BLOCK_SIZE = 1000;
 //寄存器数量
 const int REG_SIZE = 4;
+// 四元式文件路径
+const char* const QUAT_PATH = "QT.txt";
+// 符号表路径
+const char* const SYNBL_PATH = "SYNBL.txt";
 //目标代码生成路径
 const char* const TARGET_PATH = "target.txt";
 // DAG调试数据生成路径
@@ -34,6 +39,15 @@ const char* const DEBUG_ACTIVE_PATH = "debug/active.txt";
 const char* const DEBUG_BLOCK_PATH = "debug/block.txt";
 // 目标语言调试数据生成路径
 const char* const DEBUG_TARGET_PATH = "debug/target.txt";
+
+//
+string doubleToString(double x) {
+    stringstream ss;
+    ss.setf(ios::fixed);  //用定点格式显示浮点数,不会用科学计数法表示
+    ss.precision(10);  //设置变为了保留4位小数
+    ss << x;
+    return ss.str();
+}
 
 //////////////////////////////////四元式类//////////////////////////////
 class Quaternary {
@@ -78,7 +92,7 @@ enum ConstKind { NOT_CONST, BOOL, CHAR, INT, DOUBLE };
 class KindMap {
 public:
     KindMap() {
-        ifstream synbl("synbl.txt");
+        ifstream synbl(SYNBL_PATH);
         string input, mark, kind;
         getline(synbl, input);
         getline(synbl, input);
@@ -459,6 +473,8 @@ public:
                     buildNode(markID_1);
                 }
                 needNode[mark[markID_1].getNodeID()] = 1;
+                //同时替换为对应位置的主标记
+                inputQuaternary.mark_1 = mark[node[mark[markID_1].getNodeID()].getMainMark()].markString;
             }
             blockEnd = inputQuaternary;
             return;
@@ -466,7 +482,7 @@ public:
         //单目运算常值表达式
         else if(opera != "=" && kind_1 != NOT_CONST && mark_2 == "_") {
             string temp;
-            kind_1 = kindMap.getKind(mark_1);
+            kind_1 = max(kind_1, kindMap.getKind(mark_1));
             switch(kind_1) {
                 case BOOL:
                     temp = to_string(calcConstValue((bool)stoi(topMark_1)));
@@ -478,7 +494,7 @@ public:
                     temp = to_string(calcConstValue(stoi(topMark_1)));
                     break;
                 case DOUBLE:
-                    temp = to_string(calcConstValue(stof(topMark_1)));
+                    temp = doubleToString(calcConstValue(stof(topMark_1)));
                     break;
             }
             markID_1 = getMarkID(temp, newMark);
@@ -496,8 +512,8 @@ public:
         //双目运算常值表达式
         else if(opera != "=" && kind_1 != NOT_CONST && kind_2 != NOT_CONST) {
             string temp;
-            kind_1 = kindMap.getKind(mark_1);
-            kind_2 = kindMap.getKind(mark_2);
+            kind_1 = max(kind_1, kindMap.getKind(mark_1));
+            kind_2 = max(kind_1, kindMap.getKind(mark_2));
             //双目比较运算
             if(opera == ">=" || opera == ">" || opera == "<=" || opera == "<" || opera == "==" || opera == "!=") {
                 ConstKind resKind = max(kind_1, kind_2);
@@ -512,7 +528,7 @@ public:
                         temp = to_string(calcConstCompareValue(stoi(topMark_1), stoi(topMark_2), opera));
                         break;
                     case DOUBLE:
-                        temp = to_string(calcConstCompareValue(stof(topMark_1), stof(topMark_2), opera));
+                        temp = doubleToString(calcConstCompareValue(stof(topMark_1), stof(topMark_2), opera));
                         break;
                 }
             }
@@ -529,7 +545,7 @@ public:
                         temp = to_string(calcConstValue(stoi(topMark_1), stoi(topMark_2), opera[0]));
                         break;
                     case DOUBLE:
-                        temp = to_string(calcConstValue(stof(topMark_1), stof(topMark_2), opera[0]));
+                        temp = doubleToString(calcConstValue(stof(topMark_1), stof(topMark_2), opera[0]));
                         break;
                 }
             }
@@ -1030,7 +1046,8 @@ private:
             }
             //释放mark_1寄存器
             RDL[R_Mark_1] = markID_3;
-            RDL[R_Mark_2] = 0;
+            if(qua.mark_2 != "_")
+                RDL[R_Mark_2] = 0;
             useRegister[0] = R_Mark_1;
             useRegister[1] = R_Mark_2;
             useRegister[2] = R_Mark_1;
@@ -1053,7 +1070,8 @@ private:
             }
             //释放mark_1寄存器
             RDL[R_Mark_2] = markID_3;
-            RDL[R_Mark_1] = 0;
+            if(qua.mark_1 != "_")
+                RDL[R_Mark_1] = 0;
             useRegister[0] = R_Mark_2;
             useRegister[1] = R_Mark_1;
             useRegister[2] = R_Mark_2;
@@ -1282,7 +1300,7 @@ private:
 class Program {
 public:
     void readFromFile() {
-        ifstream QT("test_input.txt");
+        ifstream QT(QUAT_PATH);
         Quaternary que;
         int nowline = 0;
         bool newBlock = 0;
@@ -1353,6 +1371,6 @@ private:
 int main() {
     program.readFromFile();
     program.generate();
-    system("pause");
+    // system("pause");
     return 0;
 }

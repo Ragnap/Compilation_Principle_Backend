@@ -2,55 +2,1223 @@
 Node id:1
 l: 0  r:0
 operator: 
-have: 7| a
+have: 0| a
 
  *** mark postion:
-	7	 at 	1
+	0	 at 	1
 ###################
 
 ####### now finish line:2
 Node id:2
 l: 0  r:0
 operator: 
-have: 1| t1
+have: 9| t1
 
 Node id:1
 l: 0  r:0
 operator: 
-have: 7| a
+have: 0| a
 
  *** mark postion:
-	7	 at 	1
+	0	 at 	1
 	a	 at 	1
-	1	 at 	2
+	9	 at 	2
 ###################
 
 ####### now finish line:3
-Node id:3
-l: 1  r:2
-operator: +
-have: t2|
-
 Node id:2
 l: 0  r:0
 operator: 
-have: 1|
+have: 9| t1 b
 
 Node id:1
 l: 0  r:0
 operator: 
-have: a|
+have: 0| a
 
  *** mark postion:
+	0	 at 	1
 	a	 at 	1
-	1	 at 	2
+	9	 at 	2
+	t1	 at 	2
 ###################
 
 ####### now finish line:4
 Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+###################
+
+####### now finish line:5
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2 c
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+###################
+
+####### now finish line:6
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+###################
+
+####### now finish line:7
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+###################
+
+####### now finish line:8
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+###################
+
+####### now finish line:9
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+###################
+
+####### now finish line:10
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+###################
+
+####### now finish line:11
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+###################
+
+####### now finish line:12
+Node id:8
+l: 0  r:0
+operator: 
+have: -11.0700001717| t6
+
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+	t5	 at 	7
+	-11.0700001717	 at 	8
+###################
+
+####### now finish line:13
+Node id:9
+l: 0  r:0
+operator: 
+have: -3.4485982919| t7
+
+Node id:8
+l: 0  r:0
+operator: 
+have: -11.0700001717| t6
+
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+	t5	 at 	7
+	-11.0700001717	 at 	8
+	t6	 at 	8
+	-3.4485982919	 at 	9
+###################
+
+####### now finish line:14
+Node id:9
+l: 0  r:0
+operator: 
+have: -3.4485982919| t7 f
+
+Node id:8
+l: 0  r:0
+operator: 
+have: -11.0700001717| t6
+
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+	t5	 at 	7
+	-11.0700001717	 at 	8
+	t6	 at 	8
+	-3.4485982919	 at 	9
+	t7	 at 	9
+###################
+
+####### now finish line:15
+Node id:10
+l: 0  r:0
+operator: 
+have: 'a'| g
+
+Node id:9
+l: 0  r:0
+operator: 
+have: -3.4485982919| t7 f
+
+Node id:8
+l: 0  r:0
+operator: 
+have: -11.0700001717| t6
+
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+	t5	 at 	7
+	-11.0700001717	 at 	8
+	t6	 at 	8
+	-3.4485982919	 at 	9
+	t7	 at 	9
+	f	 at 	9
+	'a'	 at 	10
+###################
+
+####### now finish line:16
+Node id:11
+l: 0  r:0
+operator: 
+have: 1| h
+
+Node id:10
+l: 0  r:0
+operator: 
+have: 'a'| g
+
+Node id:9
+l: 0  r:0
+operator: 
+have: -3.4485982919| t7 f
+
+Node id:8
+l: 0  r:0
+operator: 
+have: -11.0700001717| t6
+
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+	t5	 at 	7
+	-11.0700001717	 at 	8
+	t6	 at 	8
+	-3.4485982919	 at 	9
+	t7	 at 	9
+	f	 at 	9
+	'a'	 at 	10
+	g	 at 	10
+	1	 at 	11
+###################
+
+####### now finish line:17
+Node id:11
+l: 0  r:0
+operator: 
+have: 1| h
+
+Node id:10
+l: 0  r:0
+operator: 
+have: 'a'| g
+
+Node id:9
+l: 0  r:0
+operator: 
+have: -3.4485982919| t7 f
+
+Node id:8
+l: 0  r:0
+operator: 
+have: -11.0700001717| t6
+
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4 t8
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+	t5	 at 	7
+	-11.0700001717	 at 	8
+	t6	 at 	8
+	-3.4485982919	 at 	9
+	t7	 at 	9
+	f	 at 	9
+	'a'	 at 	10
+	g	 at 	10
+	1	 at 	11
+	h	 at 	11
+###################
+
+####### now finish line:18
+Node id:11
+l: 0  r:0
+operator: 
+have: 1| h t9
+
+Node id:10
+l: 0  r:0
+operator: 
+have: 'a'| g
+
+Node id:9
+l: 0  r:0
+operator: 
+have: -3.4485982919| t7 f
+
+Node id:8
+l: 0  r:0
+operator: 
+have: -11.0700001717| t6
+
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4 t8
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+	t5	 at 	7
+	-11.0700001717	 at 	8
+	t6	 at 	8
+	-3.4485982919	 at 	9
+	t7	 at 	9
+	f	 at 	9
+	'a'	 at 	10
+	g	 at 	10
+	1	 at 	11
+	h	 at 	11
+	t8	 at 	2
+###################
+
+####### now finish line:19
+Node id:11
+l: 0  r:0
+operator: 
+have: 1| h t9 t10
+
+Node id:10
+l: 0  r:0
+operator: 
+have: 'a'| g
+
+Node id:9
+l: 0  r:0
+operator: 
+have: -3.4485982919| t7 f
+
+Node id:8
+l: 0  r:0
+operator: 
+have: -11.0700001717| t6
+
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4 t8
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+	t5	 at 	7
+	-11.0700001717	 at 	8
+	t6	 at 	8
+	-3.4485982919	 at 	9
+	t7	 at 	9
+	f	 at 	9
+	'a'	 at 	10
+	g	 at 	10
+	1	 at 	11
+	h	 at 	11
+	t8	 at 	2
+	t9	 at 	11
+###################
+
+####### now finish line:20
+Node id:11
+l: 0  r:0
+operator: 
+have: 1| h t9 t10 t11
+
+Node id:10
+l: 0  r:0
+operator: 
+have: 'a'| g
+
+Node id:9
+l: 0  r:0
+operator: 
+have: -3.4485982919| t7 f
+
+Node id:8
+l: 0  r:0
+operator: 
+have: -11.0700001717| t6
+
+Node id:7
+l: 0  r:0
+operator: 
+have: -1.2300000191| t5
+
+Node id:6
+l: 0  r:0
+operator: 
+have: 3.21| e
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 6.2300000191| t3 d
+
+Node id:4
+l: 0  r:0
+operator: 
+have: 5| c
+
+Node id:3
+l: 0  r:0
+operator: 
+have: 3| t2
+
+Node id:2
+l: 0  r:0
+operator: 
+have: 9| t1 b t4 t8
+
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| a
+
+ *** mark postion:
+	0	 at 	1
+	a	 at 	1
+	9	 at 	2
+	t1	 at 	2
+	b	 at 	2
+	3	 at 	3
+	t2	 at 	3
+	c	 at 	4
+	5	 at 	4
+	6.2300000191	 at 	5
+	t3	 at 	5
+	d	 at 	5
+	3.21	 at 	6
+	e	 at 	6
+	t4	 at 	2
+	-1.2300000191	 at 	7
+	t5	 at 	7
+	-11.0700001717	 at 	8
+	t6	 at 	8
+	-3.4485982919	 at 	9
+	t7	 at 	9
+	f	 at 	9
+	'a'	 at 	10
+	g	 at 	10
+	1	 at 	11
+	h	 at 	11
+	t8	 at 	2
+	t9	 at 	11
+	t10	 at 	11
+###################
+
+####### now finish line:21
+Node id:3
 l: 1  r:2
 operator: +
-have: a| t2
+have: t12|
+
+Node id:2
+l: 0  r:0
+operator: 
+have: b|
+
+Node id:1
+l: 0  r:0
+operator: 
+have: f|
+
+ *** mark postion:
+	f	 at 	1
+	b	 at 	2
+###################
+
+####### now finish line:22
+Node id:3
+l: 1  r:2
+operator: +
+have: f| t12
+
+Node id:2
+l: 0  r:0
+operator: 
+have: b|
+
+Node id:1
+l: 0  r:0
+operator: 
+have: f|
+
+ *** mark postion:
+	f	 at 	3
+	b	 at 	2
+###################
+
+####### now finish line:23
+Node id:6
+l: 4  r:5
+operator: +
+have: t13|
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 100|
+
+Node id:4
+l: 0  r:0
+operator: 
+have: c|
+
+Node id:3
+l: 1  r:2
+operator: +
+have: f| t12
+
+Node id:2
+l: 0  r:0
+operator: 
+have: b|
+
+Node id:1
+l: 0  r:0
+operator: 
+have: f|
+
+ *** mark postion:
+	f	 at 	3
+	b	 at 	2
+	t12	 at 	3
+	c	 at 	4
+	100	 at 	5
+###################
+
+####### now finish line:24
+Node id:6
+l: 4  r:5
+operator: +
+have: c| t13
+
+Node id:5
+l: 0  r:0
+operator: 
+have: 100|
+
+Node id:4
+l: 0  r:0
+operator: 
+have: c|
+
+Node id:3
+l: 1  r:2
+operator: +
+have: f| t12
+
+Node id:2
+l: 0  r:0
+operator: 
+have: b|
+
+Node id:1
+l: 0  r:0
+operator: 
+have: f|
+
+ *** mark postion:
+	f	 at 	3
+	b	 at 	2
+	t12	 at 	3
+	c	 at 	6
+	100	 at 	5
+###################
+
+####### now finish line:25
+Node id:3
+l: 1  r:2
+operator: !
+have: t14|
+
+Node id:2
+l: 0  r:0
+operator: 
+have: _|
+
+Node id:1
+l: 0  r:0
+operator: 
+have: d|
+
+ *** mark postion:
+	d	 at 	1
+	_	 at 	2
+###################
+
+####### now finish line:26
+Node id:1
+l: 0  r:0
+operator: 
+have: 0| d
+
+ *** mark postion:
+	0	 at 	1
+###################
+
+####### now finish line:27
+Node id:3
+l: 1  r:2
+operator: -
+have: t15|
 
 Node id:2
 l: 0  r:0
@@ -60,74 +1228,76 @@ have: 1|
 Node id:1
 l: 0  r:0
 operator: 
-have: a|
+have: h|
 
  *** mark postion:
-	a	 at 	3
+	h	 at 	1
 	1	 at 	2
 ###################
 
-####### now finish line:5
-Node id:1
+####### now finish line:28
+Node id:5
+l: 3  r:4
+operator: !
+have: t16|
+
+Node id:4
 l: 0  r:0
 operator: 
-have: 9| a
+have: _|
 
- *** mark postion:
-	9	 at 	1
-###################
-
-####### now finish line:6
-Node id:1
-l: 0  r:0
-operator: 
-have: 9| c
-
- *** mark postion:
-	9	 at 	1
-###################
-
-####### now finish line:7
 Node id:3
 l: 1  r:2
-operator: +
-have: t3|
+operator: -
+have: t15|
 
 Node id:2
 l: 0  r:0
 operator: 
-have: b|
+have: 1|
 
 Node id:1
 l: 0  r:0
 operator: 
-have: 9| c
+have: h|
 
  *** mark postion:
-	9	 at 	1
-	c	 at 	1
-	b	 at 	2
+	h	 at 	1
+	1	 at 	2
+	t15	 at 	3
+	_	 at 	4
 ###################
 
-####### now finish line:8
+####### now finish line:29
+Node id:5
+l: 3  r:4
+operator: !
+have: h| t16
+
+Node id:4
+l: 0  r:0
+operator: 
+have: _|
+
 Node id:3
 l: 1  r:2
-operator: +
-have: c| t3
+operator: -
+have: t15|
 
 Node id:2
 l: 0  r:0
 operator: 
-have: b|
+have: 1|
 
 Node id:1
 l: 0  r:0
 operator: 
-have: 9|
+have: h|
 
  *** mark postion:
-	9	 at 	1
-	c	 at 	3
-	b	 at 	2
+	h	 at 	5
+	1	 at 	2
+	t15	 at 	3
+	_	 at 	4
 ###################
 
