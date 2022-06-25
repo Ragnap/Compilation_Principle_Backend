@@ -1,44 +1,29 @@
-line's block:
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 2 3 3 4 4 5 6 6 6 6 
+
 
 ########### now block ID: 0
  *** after DAG:
 *(main	_	_	_	)
 (=	0	_	a	)
 (=	9	_	b	)
-(=	5	_	c	)
-(=	6.2300000191	_	d	)
-(=	3.21	_	e	)
-(=	-3.4485982919	_	f	)
-(=	'a'	_	g	)
-(=	1	_	h	)
+(=	3	_	c	)
 (if	1	_	_	)
 
  *** with activity:
 *(main	_	_	_	)
 (=    	0   	_   	a(1)	)
 (=    	9   	_   	b(1)	)
-(=    	5   	_   	c(0)	)
-(=    	6.2300000191   	_   	d(1)	)
-(=    	3.21   	_   	e(1)	)
-(=    	-3.4485982919   	_   	f(1)	)
-(=    	'a'   	_   	g(1)	)
-(=    	1   	_   	h(1)	)
+(=    	3   	_   	c(1)	)
 (if    	1   	_   	_   	)
-Ture: -1	False: -1
 
 
 ########### now block ID: 1
  *** after DAG:
-(+	f	b	f	)
-(+	c	100	c	)
+(+	a	1	a	)
 (el	_	_	_	)
 
  *** with activity:
-(+    	f(0)	b(0)	f(1)	)
-(+    	c(0)	100   	c(1)	)
+(+    	a(1)	1   	a(1)	)
 (el    	_   	_   	_   	)
-Ture: -1	False: -1
 
 
 ########### now block ID: 2
@@ -47,29 +32,26 @@ Ture: -1	False: -1
 
  *** with activity:
 (wh    	_   	_   	_   	)
-Ture: -1	False: -1
 
 
 ########### now block ID: 3
  *** after DAG:
-(!	d	_	t14	)
-(do	t14	_	_	)
+(!=	b	0	t7	)
+(do	t7	_	_	)
 
  *** with activity:
-(!    	d(0)	_   	t14(1)	)
-(do    	t14(0)	_   	_   	)
-Ture: -1	False: -1
+(!=    	b(1)	0   	t7(1)	)
+(do    	t7(0)	_   	_   	)
 
 
 ########### now block ID: 4
  *** after DAG:
-(=	0	_	d	)
+(-	b	1	b	)
 (we	_	_	_	)
 
  *** with activity:
-(=    	0   	_   	d(1)	)
+(-    	b(1)	1   	b(1)	)
 (we    	_   	_   	_   	)
-Ture: -1	False: -1
 
 
 ########### now block ID: 5
@@ -78,19 +60,13 @@ Ture: -1	False: -1
 
  *** with activity:
 (ie    	_   	_   	_   	)
-Ture: -1	False: -1
 
 
 ########### now block ID: 6
  *** after DAG:
-(-	h	1	t15	)
-(!	t15	_	h	)
 (end	_	_	_	)
 
  *** with activity:
-(-    	h(0)	1   	t15(1)	)
-(!    	t15(0)	_   	h(1)	)
 (end    	_   	_   	_   	)
-Ture: -1	False: -1
 
 

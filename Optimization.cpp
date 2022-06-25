@@ -1,7 +1,7 @@
 /**
  * @Author       : RagnaLP
  * @Date         : 2022-06-13 11:38:40
- * @LastEditTime : 2022-06-18 09:41:12
+ * @LastEditTime : 2022-06-24 15:09:14
  * @Description  : 后端程序
  */
 #include <cstdio>
@@ -24,7 +24,7 @@ const int QUAT_SIZE = 1000;
 //最大分块数量
 const int BLOCK_SIZE = 1000;
 //寄存器数量
-const int REG_SIZE = 4;
+const int REG_SIZE = 1;
 // 四元式文件路径
 const char* const QUAT_PATH = "QT.txt";
 // 符号表路径
@@ -700,10 +700,10 @@ private:
             }
             debug << endl << endl;
         }
-        debug << " *** mark postion:" << endl;
-        for(int i = 1; i < markCnt; i++) {
-            debug << "\t" << mark[i].markString << "\t at \t" << mark[i].getNodeID() << endl;
-        }
+        // debug << " *** mark postion:" << endl;
+        // for(int i = 1; i < markCnt; i++) {
+        //     debug << "\t" << mark[i].markString << "\t at \t" << mark[i].getNodeID() << endl;
+        // }
         debug << "###################" << endl;
         debug << endl;
     }
@@ -908,7 +908,7 @@ public:
                 //填写上一个el的跳转位置
                 int last = waitingEL.top();
                 waitingEL.pop();
-                target[last] += to_string(targetLineNum);
+                target[last] += to_string(targetLineNum - 1);
 
                 clearRegister();
             }
@@ -984,12 +984,20 @@ public:
             check();
 #endif
         }
+        // 程序结束时保存所有寄存器值
+        for(int i = 0; i < REG_SIZE; i++) {
+            if(mark[RDL[i]].isTempMark() || checkConstKind(mark[RDL[i]].markString))
+                continue;
+            temp = "ST\tR" + to_string(i) + "\t," + mark[RDL[i]].markString;
+            target.push_back(temp);
+            targetLineNum++;
+        }
         clearRegister();
     }
     //重置寄存器状态
     void clearRegister() {
         memset(nowActive, 0, sizeof(nowActive));
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < REG_SIZE; i++) {
             RDL[i] = 0;
         }
     }
@@ -1140,8 +1148,11 @@ private:
             debug << target[i] << endl;
         }
         debug << endl;
-        debug << " *** the reg: \t" << endl;
-        debug << "\tR0  R1  R2  R3 " << endl;
+        debug << " *** the reg:" << endl << "\t";
+        for(int i = 0; i < REG_SIZE; i++) {
+            debug << "R" << i << "  ";
+        }
+        debug << endl;
         for(int i = 0; i < REG_SIZE; i++) {
             debug << "\t" << mark[RDL[i]].markString;
         }
@@ -1159,19 +1170,10 @@ public:
         clear();
         quat.clear();
     }
-    //返回条件为真/无条件 时转向的块的ID
-    int getNextTrueID() {
-        return nextTrueID;
-    }
-    //返回条件为假时转向的块的ID
-    int getNextFalseID() {
-        return nextFalseID;
-    }
     //重置
     void clear() {
         quat.clear();
         quatCnt = 0;
-        nextTrueID = nextFalseID = -1;
     }
     //新加一条四元式
     void addQuaternery(Quaternary qua) {
@@ -1181,14 +1183,6 @@ public:
     //特殊的头四元式
     void addHeadQuaternery(Quaternary header) {
         head = header;
-    }
-    //设置条件为真/无条件的下个块编号
-    void setNextTrueID(int nextTrue) {
-        nextTrueID = nextTrue;
-    }
-    //设置条件为假的下个块编号
-    void setNextFalseID(int nextFalse) {
-        nextFalseID = nextFalse;
     }
     // DAG优化
     void optimization() {
@@ -1216,23 +1210,17 @@ public:
                 isActive[i][0] = needActive[markID[quat[i].mark_1]];
                 needActive[markID[quat[i].mark_1]] = 1;
             }
-            else
-                isActive[i][0] = 0;
             if(quat[i].mark_2 != "_" && checkConstKind(quat[i].mark_2) == NOT_CONST) {
                 isActive[i][1] = needActive[markID[quat[i].mark_2]];
                 needActive[markID[quat[i].mark_2]] = 1;
             }
-            else
-                isActive[i][1] = 0;
             if(quat[i].result != "_" && checkConstKind(quat[i].result) == NOT_CONST) {
                 isActive[i][2] = needActive[markID[quat[i].result]];
                 needActive[markID[quat[i].result]] = 0;
             }
-            else
-                isActive[i][2] = 0;
         }
     }
-    //块内进行简化与标记活跃信息
+    //块内进行简化与标记活跃信息并生成目标代码
     void generate() {
         optimization();
         getActiveInfo();
@@ -1252,7 +1240,9 @@ public:
             output << quat[i].result << "\t";
             output << ')' << endl;
         }
+
         output << endl << " *** with activity:" << endl;
+
         if(head.ope.size()) {
             output << "*(" << head.ope << '\t' << head.mark_1 << '\t' << head.mark_2 << '\t' << head.result << '\t' << ')' << endl;
         }
@@ -1277,7 +1267,6 @@ public:
                 output << "   \t";
             output << ')' << endl;
         }
-        output << "Ture: " << nextTrueID << "\tFalse: " << nextFalseID << endl;
         output << endl;
     }
 #endif
@@ -1288,10 +1277,6 @@ private:
     vector<Quaternary> quat;
     //四元式记数
     int quatCnt;
-    //条件为真/无条件 时转向的块的ID
-    int nextTrueID;
-    //条件为假时转向的块的ID
-    int nextFalseID;
 
 } block[BLOCK_SIZE];
 
@@ -1299,32 +1284,26 @@ private:
 
 class Program {
 public:
+    //读入并分块
     void readFromFile() {
         ifstream QT(QUAT_PATH);
         Quaternary que;
         int nowline = 0;
-        bool newBlock = 0;
         QT >> que.ope;  //读掉 "QT:"
         while(QT >> que.ope) {
             QT >> que.mark_1 >> que.mark_2 >> que.result;
-            allQuats[nowline] = que;
-
             if(que.ope == "main") {
                 block[nowBlock].addHeadQuaternery(que);
-                lineBlockID[nowline] = nowBlock;
             }
             else if(que.result != "_") {
                 block[nowBlock].addQuaternery(que);
-                lineBlockID[nowline] = nowBlock;
             }
             else if(que.ope == "if" || que.ope == "wh" || que.ope == "el" || que.ope == "ie" || que.ope == "do" || que.ope == "we") {
                 block[nowBlock].addQuaternery(que);
-                lineBlockID[nowline] = nowBlock;
                 nowBlock++;
             }
             else if(que.ope == "end") {
                 block[nowBlock].addQuaternery(que);
-                lineBlockID[nowline] = nowBlock;
             }
             nowline++;
         }
@@ -1341,23 +1320,17 @@ public:
     }
 
 private:
-    //所有四元式
-    Quaternary allQuats[QUAT_SIZE];
     //四元式个数
     int quatCnt;
     //当前已分配块编号
     int nowBlock;
-    //某一行四元式对应的块编号
-    int lineBlockID[QUAT_SIZE];
+
 #ifdef DEBUG
     //调试用文件流
     ofstream debug;
     //调试用函数
     void check() {
         debug.open(DEBUG_BLOCK_PATH);
-        debug << "line's block:" << endl;
-        for(int i = 0; i < quatCnt; i++)
-            debug << lineBlockID[i] << " ";
         debug << endl << endl;
         for(int i = 0; i < nowBlock; i++) {
             debug << "########### now block ID: " << i << endl;

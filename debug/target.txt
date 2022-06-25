@@ -1,529 +1,232 @@
 ########## target building: 1
 LD	R0	,0
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	a			
+ *** the reg:
+	R0  
+	a
 
 ########## target building: 2
 LD	R0	,0
-LD	R1	,9
+ST	R0	,a
+LD	R0	,9
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	a	b		
+ *** the reg:
+	R0  
+	b
 
 ########## target building: 3
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
+ST	R0	,a
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	a	b	c	
+ *** the reg:
+	R0  
+	c
 
 ########## target building: 4
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
+ST	R0	,a
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
+LD	R0	,1
+FJ	R0	,
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	a	b	c	d
+ *** the reg:
+	R0  
+	
 
 ########## target building: 5
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
 ST	R0	,a
-LD	R0	,3.21
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
+LD	R0	,1
+FJ	R0	,
+LD	R0	,a
+ADD	R0	,1
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	e	b	c	d
+ *** the reg:
+	R0  
+	a
 
 ########## target building: 6
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
 ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
+LD	R0	,1
+FJ	R0	,12
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	f	b	c	d
+ *** the reg:
+	R0  
+	
 
 ########## target building: 7
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
 ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
+LD	R0	,1
+FJ	R0	,12
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	g	b	c	d
+ *** the reg:
+	R0  
+	
 
 ########## target building: 8
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
 ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
 LD	R0	,1
+FJ	R0	,12
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,
+LD	R0	,b
+NE	R0	,0
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	h	b	c	d
+ *** the reg:
+	R0  
+	t7
 
 ########## target building: 9
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
 ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
 LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
+FJ	R0	,12
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,
+LD	R0	,b
+NE	R0	,0
 FJ	R0	,
 
- *** the reg: 	
-	R0  R1  R2  R3 
-				
+ *** the reg:
+	R0  
+	
 
 ########## target building: 10
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
 ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
 LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
+FJ	R0	,12
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,
+LD	R0	,b
+NE	R0	,0
 FJ	R0	,
-LD	R0	,f
-ADD	R0	,b
+LD	R0	,b
+SUB	R0	,1
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	f			
+ *** the reg:
+	R0  
+	b
 
 ########## target building: 11
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
 ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
 LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
+FJ	R0	,12
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,
+LD	R0	,b
+NE	R0	,0
+FJ	R0	,19
+LD	R0	,b
+SUB	R0	,1
+ST	R0	,b
+JMP	_	,12
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	f	c		
+ *** the reg:
+	R0  
+	
 
 ########## target building: 12
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
 ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
 LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,
+FJ	R0	,12
+LD	R0	,a
+ADD	R0	,1
+ST	R0	,a
+JMP	_	,19
+LD	R0	,b
+NE	R0	,0
+FJ	R0	,19
+LD	R0	,b
+SUB	R0	,1
+ST	R0	,b
+JMP	_	,12
 
- *** the reg: 	
-	R0  R1  R2  R3 
-				
+ *** the reg:
+	R0  
+	
 
 ########## target building: 13
 LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
 ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
+LD	R0	,9
+ST	R0	,b
+LD	R0	,3
+ST	R0	,c
 LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,
-
- *** the reg: 	
-	R0  R1  R2  R3 
-				
-
-########## target building: 14
-LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
+FJ	R0	,12
+LD	R0	,a
+ADD	R0	,1
 ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
-LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,
-LD	R0	,d
-NO	R0
-
- *** the reg: 	
-	R0  R1  R2  R3 
-	t14			
-
-########## target building: 15
-LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
-ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
-LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,
-LD	R0	,d
-NO	R0
-FJ	R0	,
-
- *** the reg: 	
-	R0  R1  R2  R3 
-				
-
-########## target building: 16
-LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
-ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
-LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,
-LD	R0	,d
-NO	R0
-FJ	R0	,
-LD	R0	,0
-
- *** the reg: 	
-	R0  R1  R2  R3 
-	d			
-
-########## target building: 17
-LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
-ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
-LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,
-LD	R0	,d
-NO	R0
-FJ	R0	,31
-LD	R0	,0
-ST	R0	,d
-JMP	_	,25
-
- *** the reg: 	
-	R0  R1  R2  R3 
-				
-
-########## target building: 18
-LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
-ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
-LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,32
-LD	R0	,d
-NO	R0
-FJ	R0	,31
-LD	R0	,0
-ST	R0	,d
-JMP	_	,25
-
- *** the reg: 	
-	R0  R1  R2  R3 
-				
-
-########## target building: 19
-LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
-ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
-LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,32
-LD	R0	,d
-NO	R0
-FJ	R0	,31
-LD	R0	,0
-ST	R0	,d
-JMP	_	,25
-LD	R0	,h
+JMP	_	,19
+LD	R0	,b
+NE	R0	,0
+FJ	R0	,19
+LD	R0	,b
 SUB	R0	,1
+ST	R0	,b
+JMP	_	,12
 
- *** the reg: 	
-	R0  R1  R2  R3 
-	t15			
-
-########## target building: 20
-LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
-ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
-LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,32
-LD	R0	,d
-NO	R0
-FJ	R0	,31
-LD	R0	,0
-ST	R0	,d
-JMP	_	,25
-LD	R0	,h
-SUB	R0	,1
-NO	R0
-
- *** the reg: 	
-	R0  R1  R2  R3 
-	h			
-
-########## target building: 21
-LD	R0	,0
-LD	R1	,9
-LD	R2	,5
-LD	R3	,6.2300000191
-ST	R0	,a
-LD	R0	,3.21
-ST	R0	,e
-LD	R0	,-3.4485982919
-ST	R0	,f
-LD	R0	,'a'
-ST	R0	,g
-LD	R0	,1
-ST	R0	,h
-ST	R1	,b
-ST	R2	,c
-ST	R3	,d
-LD	R0	,1
-FJ	R0	,25
-LD	R0	,f
-ADD	R0	,b
-LD	R1	,c
-ADD	R1	,100
-ST	R0	,f
-ST	R1	,c
-JMP	_	,32
-LD	R0	,d
-NO	R0
-FJ	R0	,31
-LD	R0	,0
-ST	R0	,d
-JMP	_	,25
-LD	R0	,h
-SUB	R0	,1
-NO	R0
-
- *** the reg: 	
-	R0  R1  R2  R3 
-	h			
+ *** the reg:
+	R0  
+	
 
